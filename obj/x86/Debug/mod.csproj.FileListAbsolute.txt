@@ -1,0 +1,14 @@
+C:\Users\User\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csprojAssemblyReference.cache
+C:\Users\User\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csproj.CopyComplete
+C:\Users\User\Documents\DuckGame\Mods\C44P\obj\x86\Debug\C44P.dll
+C:\Users\User\Documents\DuckGame\Mods\C44P\obj\x86\Debug\C44P.pdb
+C:\Users\User\Documents\DuckGame\Mods\C44P.dll
+C:\Users\User\Documents\DuckGame\Mods\C44P.pdb
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csprojAssemblyReference.cache
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csproj.CoreCompileInputs.cache
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P\obj\x86\Debug\mod.csproj.CopyComplete
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P\obj\x86\Debug\C44P.dll
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P\obj\x86\Debug\C44P.pdb
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P.dll
+C:\Users\Almaz\Documents\DuckGame\Mods\C44P.pdb

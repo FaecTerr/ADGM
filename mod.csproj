@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B07BDC3C-3770-4A07-90D8-5C2A68E2172B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>C44P</RootNamespace>
+    <AssemblyName>C44P</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>
+    </DocumentationFile>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>..\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DuckGame">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Duck Game\DuckGame.exe</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Microsoft.Xna.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Microsoft.Xna.Framework.Game.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Microsoft.Xna.Framework.Graphics.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Gamemods\Collect GM\CollectingUI.cs" />
+    <Compile Include="src\Gamemods\CP GM\ContestZone.cs" />
+    <Compile Include="src\DinamicSFX.cs" />
+    <Compile Include="src\Gamemods\ForceTag.cs" />
+    <Compile Include="src\Furniture\ColoredBricks.cs" />
+    <Compile Include="src\Furniture\Desert.cs" />
+    <Compile Include="src\Furniture\Furniture.cs" />
+    <Compile Include="src\Furniture\Seats.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\DefuseFore.cs" />
+    <Compile Include="src\Gamemods\CP GM\GM_CP.cs" />
+    <Compile Include="src\Gamemods\GM_Stole\ContestSafe.cs" />
+    <Compile Include="src\Gamemods\GM_Stole\GMStolen.cs" />
+    <Compile Include="src\Grenades\BaseGrenade.cs" />
+    <Compile Include="src\Grenades\FireGrenade.cs" />
+    <Compile Include="src\Grenades\Flashbang.cs" />
+    <Compile Include="src\Grenades\Flashlight.cs" />
+    <Compile Include="src\Grenades\SmokeGR.cs" />
+    <Compile Include="src\Grenades\SmokeGrenade.cs" />
+    <Compile Include="src\Grenades\StunLight.cs" />
+    <Compile Include="src\Furniture\Sign.cs" />
+    <Compile Include="src\Gamemods\CTF GM\Flag.cs" />
+    <Compile Include="src\Gamemods\CTF GM\FlagBase.cs" />
+    <Compile Include="src\Gamemods\CTF GM\GM CTF.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\PlantZone.cs" />
+    <Compile Include="src\Gamemods\ProgressBarType.cs" />
+    <Compile Include="src\Gamemods\CTF GM\TeamCounter.cs" />
+    <Compile Include="src\Gamemods\CTF GM\Safezone.cs" />
+    <Compile Include="src\Gamemods\Respawner.cs" />
+    <Compile Include="src\TeamsSet\ModTeams.cs" />
+    <Compile Include="src\Main\AutoUpdate.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\ButtonsG.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\C4.cs" />
+    <Compile Include="src\Furniture\Chair.cs" />
+    <Compile Include="src\Gamemods\Collect GM\CollectBase.cs" />
+    <Compile Include="src\Gamemods\Collect GM\Collectible.cs" />
+    <Compile Include="src\TeamsSet\CTEquipment.cs" />
+    <Compile Include="src\TeamsSet\Fuse_armor.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\Defuser.cs" />
+    <Compile Include="src\Gamemods\Collect GM\GM Collection.cs" />
+    <Compile Include="src\Gamemods\Fuse GM\GM Fuse.cs" />
+    <Compile Include="src\Gamemods\GMTimer.cs" />
+    <Compile Include="src\Furniture\HardCrate.cs" />
+    <Compile Include="src\Main\Mod.cs" />
+    <Compile Include="src\Furniture\Piano.cs" />
+    <Compile Include="src\Furniture\Sofa.cs" />
+    <Compile Include="src\Furniture\Tanker.cs" />
+    <Compile Include="src\TeamsSet\TEquipment.cs" />
+    <Compile Include="src\Upstairs.cs" />
+    <Compile Include="src\WallDoor.cs" />
+    <Compile Include="src\Weapons\M16.cs" />
+    <Compile Include="src\Weapons\MagnumOpus.cs" />
+    <Compile Include="src\Weapons\MP5.cs" />
+    <Compile Include="src\Weapons\Newpistol.cs" />
+    <Compile Include="src\Weapons\OldVinchester.cs" />
+    <Compile Include="src\Weapons\SNAIPER.cs" />
+    <Compile Include="src\Weapons\Thunderbuss.cs" />
+    <Compile Include="src\Weapons\XM1014.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
