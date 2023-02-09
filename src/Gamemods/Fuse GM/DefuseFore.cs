@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
     public class DefuseFore : Thing
     {
@@ -25,7 +19,8 @@ namespace DuckGame.C44P
             base.Update();
             if(Timer > 0f)
             {
-                Timer -= 0.01666666f;
+                Timer -= 0.01f;
+                depth = new Depth(depth.value - 0.01f, depth.span);
             }
             else
             {

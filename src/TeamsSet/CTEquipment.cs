@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
     public class CTEquipment : Fuse_armor
     {

@@ -44,9 +44,6 @@ namespace DuckGame.C44P
                 _stream.position = position;
                 _fluidData.amount = volume / (charges * pie_pieces);
                 _stream.Feed(_fluidData);
-
-                Spark spark = Spark.New(position.x, position.y, new Vec2((float)Math.Cos(i * 360 / 16), (float)Math.Sin(i * 360 / 16)) * 2.5f, 0.002f);
-                Level.Add(spark);
             }
 
             for (int i = 0; i < 4; i++)

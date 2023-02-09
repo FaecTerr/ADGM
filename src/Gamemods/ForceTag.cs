@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DuckGame.C44P
 {
@@ -31,7 +27,6 @@ namespace DuckGame.C44P
         public override void Update()
         {
             base.Update();
-
         }
         public override void Draw()
         {

@@ -15,8 +15,6 @@ namespace DuckGame.C44P
         private TeamCounter teamCounter;
 
         public bool Activate = false;
-        public float time = 90f;
-        public string _string;
         public bool winnerDefined;
         public bool init;
 
@@ -26,7 +24,7 @@ namespace DuckGame.C44P
         public EditorProperty<float> RoundTime;
         public EditorProperty<bool> Revive;
 
-        public GM_CTF(float xval, float yval, GMTimer gmt = null) : base(xval, yval)
+        public GM_CTF(float xval, float yval) : base(xval, yval)
         {
             _sprite = new SpriteMap(GetPath("Sprites/Gamemods/GameMode.png"), 16, 16, false);
             base.graphic = _sprite;
@@ -35,8 +33,7 @@ namespace DuckGame.C44P
             collisionSize = new Vec2(14f, 14f);
             graphic = _sprite;
             _visibleInGame = false;
-            _timer = gmt;
-            _string = Convert.ToString(time);
+
             maxPoints = new EditorProperty<float>(3, this, 1f, 8f, 1f, null, false, false) { name = "Goal points"};
             RoundTime = new EditorProperty<float>(90f, this, 30f, 180f, 1f, null, false, false);
             Revive = new EditorProperty<bool>(true);
@@ -51,7 +48,6 @@ namespace DuckGame.C44P
             if (init == false)
             {
                 init = true;
-                time = RoundTime; 
                 if (_timer == null && !(Level.current is Editor)) //adding timer to level
                 {
                     _timer = new GMTimer(position.x, position.y - 16f)
@@ -60,25 +56,12 @@ namespace DuckGame.C44P
                         depth = 0.95f,
                         progressBar = true,
                         progressBarType = ProgressBarType.ScoreCompetition,
-                        progressTarget = maxPoints
+                        progressTarget = maxPoints,
+                        time = RoundTime
                     };
                     Level.Add(_timer);
+                    _timer.Resume();
                 }
-                
-                /*foreach (Team t in Teams.active)
-                {
-                    foreach(Profile p in t.activeProfiles)
-                    {
-                        if(p.duck != null)
-                        {
-                            FlagBase f = Level.Nearest<FlagBase>(p.duck.position);
-                            if(f != null)
-                            {
-                                f.ReassignTeam(t);
-                            }
-                        }
-                    }
-                }*/
 
                 if (_timer != null)
                 {
@@ -97,59 +80,57 @@ namespace DuckGame.C44P
                 }
             }
 
-            if (time > 0f) //Timer update and win conditions
+            if (_timer != null)
             {
-                time -= 0.0166666f;
-                if (_timer != null)
+                if (_timer.time > 0f) //Timer update and win conditions
                 {
-                    _timer.time = time;
-                    Fondle(_timer);
-                }
+                    _timer.time -= 0.0166666f;
 
-                for (int i = 0; i < Math.Min(scores.Length, Teams.active.Count); i++)
-                {
-                    if(scores[i] >= maxPoints && !winnerDefined)
+                    for (int i = 0; i < Math.Min(scores.Length, Teams.active.Count); i++)
                     {
-                        TeamWin(Teams.active[i]);
-                        time = 0;
-                    }
-                    teamCounter.count[i] = scores[i];
-                }
-            }
-            if (time <= 0f && !winnerDefined) //Win Conditions after time is up
-            {
-                int currentMaxPoint = scores[0];
-                List<Team> winners = new List<Team>();
-                for (int i = 0; i < scores.Length; i++)
-                {
-                    if(scores[i] > currentMaxPoint)
-                    {
-                        currentMaxPoint = scores[i];
-                    }                    
-                }
-
-                for (int i = 0; i < Math.Min(scores.Length, Teams.active.Count); i++)
-                {
-                    if (scores[i] == currentMaxPoint)
-                    {
-                        winners.Add(Teams.active[i]);
+                        if (scores[i] >= maxPoints && !winnerDefined)
+                        {
+                            TeamWin(Teams.active[i]);
+                            _timer.time = 0;
+                        }
+                        teamCounter.count[i] = scores[i];
                     }
                 }
+                else if (!winnerDefined) //Win Conditions after time is up
+                {
+                    int currentMaxPoint = scores[0];
+                    List<Team> winners = new List<Team>();
+                    for (int i = 0; i < scores.Length; i++)
+                    {
+                        if (scores[i] > currentMaxPoint)
+                        {
+                            currentMaxPoint = scores[i];
+                        }
+                    }
 
-                if (winners.Count == 1)
-                {
-                    TeamWin(winners[0]);
-                }
-                else
-                {
-                    TeamWin(null);
+                    for (int i = 0; i < Math.Min(scores.Length, Teams.active.Count); i++)
+                    {
+                        if (scores[i] == currentMaxPoint)
+                        {
+                            winners.Add(Teams.active[i]);
+                        }
+                    }
+
+                    if (winners.Count == 1)
+                    {
+                        TeamWin(winners[0]);
+                    }
+                    else
+                    {
+                        TeamWin(null);
+                    }
                 }
             }
             foreach (FlagBase flagB in Level.current.things[typeof(FlagBase)]) //Counting of flag points
             {
                 if (flagB != null)
                 {
-                    if(flagB._flag != null && flagB.getPoint == true && flagB.Team < scores.Length)
+                    if(flagB._flag != null && flagB.getPoint && flagB.Team < scores.Length)
                     {
                         flagB.getPoint = false;
                         scores[flagB.Team]++;

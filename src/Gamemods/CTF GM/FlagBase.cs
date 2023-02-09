@@ -16,9 +16,9 @@ namespace DuckGame.C44P
         public Flag _flag;
         public Team dgTeam;
 
+        private bool init;
         public bool getPoint = false;
         public int Team;
-        private bool init;
 
         public EditorProperty<int> team; 
         public bool flagOnBase
@@ -94,13 +94,13 @@ namespace DuckGame.C44P
             {
                 _flag.Team = Team;
                 _flag.based = true;
-                if (_flag.delivered == true)
+                if (_flag.delivered)
                 {
                     _flag.delivered = false;
                     _flag.position = new Vec2(position.x, position.y - 27.5f);
                     _flag.OnBase = true;
                 }
-                if (_flag.ToBase == true)
+                if (_flag.ToBase)
                 {
                     _flag.position = new Vec2(position.x, position.y - 27.5f);
                     _flag.ToBase = false;

@@ -74,7 +74,6 @@
   <ItemGroup>
     <Compile Include="src\Gamemods\Collect GM\CollectingUI.cs" />
     <Compile Include="src\Gamemods\CP GM\ContestZone.cs" />
-    <Compile Include="src\DinamicSFX.cs" />
     <Compile Include="src\Gamemods\ForceTag.cs" />
     <Compile Include="src\Furniture\ColoredBricks.cs" />
     <Compile Include="src\Furniture\Desert.cs" />

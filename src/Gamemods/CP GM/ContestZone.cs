@@ -82,51 +82,51 @@
             {
                 rig = false;
             }
-            if(up == false && dow == false && lef == false && rig == false)
+            if(!up && !dow && !lef && !rig)
             {
                 _sprite.frame = 8;
             }
-            else if (up == true && dow == true && lef == true && rig == true)
+            else if (up && dow && lef && rig)
             {
                 _sprite.frame = 9;
             }
-            else if(up == false)
+            else if(!up)
             {
-                if(dow == true && rig == true && lef == true)
+                if(dow && rig && lef)
                 {
                     _sprite.frame = 6;
                 }
-                else if(rig == false && dow == true && lef == true)
+                else if(!rig && dow && lef)
                 {
                     _sprite.frame = 1;
                 }
-                else if (rig == true && dow == true && lef == false)
+                else if (rig && dow && !lef)
                 {
                     _sprite.frame = 0;
                 }
             }
-            else if(dow == false)
+            else if(!dow)
             {
-                if (up == true && rig == true && lef == true)
+                if (up && rig && lef)
                 {
                     _sprite.frame = 4;
                 }
-                else if (rig == false && up == true && lef == true)
+                else if (!rig && up && lef)
                 {
                     _sprite.frame = 2;
                 }
-                else if (rig == true && up == true && lef == false)
+                else if (rig && up && !lef)
                 {
                     _sprite.frame = 3;
                 }
             }
-            else if(up == true && dow == true)
+            else if(up && dow)
             {
-                if(rig == true)
+                if(rig)
                 {
                     _sprite.frame = 5;
                 }
-                else if(lef == true)
+                else if(lef)
                 {
                     _sprite.frame = 7;
                 }

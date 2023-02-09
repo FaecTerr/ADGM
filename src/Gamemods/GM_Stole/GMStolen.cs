@@ -9,10 +9,7 @@ namespace DuckGame.C44P
         public GMTimer _timer;
 
         public bool Activate = false;
-        public float time = 90f;
-        public bool ctWins = false;
-        public bool tWins = false;
-        public string _string;
+        public bool winnerDefined;
         public int contestedSafes;
         public bool init = false;
 
@@ -53,20 +50,6 @@ namespace DuckGame.C44P
                     contestedSafes += 1;
                 }
             }
-            if (_timer != null)
-            {
-                if (time > 0f)
-                {
-                    if (_timer != null)
-                    {
-                        _timer.time = time;
-                        Fondle(_timer);
-                    }
-                    _string = Convert.ToString(time);
-                    time -= 0.0166666f;
-                }
-                _timer.progress = (float)contestedSafes;
-            }
             foreach (Fuse_armor armor in Level.current.things[typeof(Fuse_armor)]) //after getting a hit by bullet in armor duck will instantly respawn at respawn point
             {
                 if (Revive == true)
@@ -78,78 +61,65 @@ namespace DuckGame.C44P
                     }
                 }
             }
-            if (init == false)
+            if (_timer != null)
             {
-                init = true;
-                time = RoundTime;
-            }
-            if ((time >= 14.97f && time < 15f))
-            {
-                SFX.Play(GetPath("15sec.wav"), 1f, 0f, 0f, false);
-            }
-            if ((time >= 9.97f && time < 10f))
-            {
-                SFX.Play(GetPath("10sec.wav"), 1f, 0f, 0f, false);
-            }
-            if (((time >= 4.97f && time < 5f) || (time >= 3.97f && time < 4f) || (time >= 2.97f && time < 3f) || (time >= 1.97f && time < 2f) || (time >= 0.97f && time < 1f)))
-            {
-                SFX.Play(GetPath("LastSec.wav"), 1f, 0f, 0f, false);
-            }
-            if (!(Level.current is Editor))
-            {
-                if (_timer == null && !(Level.current is Editor))
+                if (_timer.time > 0f)
                 {
-                    _timer = new GMTimer(position.x, position.y - 16f)
-                    {
-                        anchor = this,
-                        depth = 0.95f,
-                        progressBar = true,
-                        progressBarType = ProgressBarType.KeyPoint,
-                        progressTarget = SafesToWin
-                    };
-                    Level.Add(_timer);
-                    Fondle(_timer);
+                    _timer.time -= 0.0166666f;
                 }
-                foreach (GMTimer gm in Level.current.things[typeof(GMTimer)])
+                _timer.progress = (float)contestedSafes;
+
+
+                if (_timer.time >= 14.97f && _timer.time < 15f)
                 {
-                    if (gm != null && _timer != null)
+                    SFX.Play(GetPath("15sec.wav"), 1f, 0f, 0f, false);
+                }
+                if (_timer.time >= 9.97f && _timer.time < 10f)
+                {
+                    SFX.Play(GetPath("10sec.wav"), 1f, 0f, 0f, false);
+                }
+                if (_timer.time % 1 >= 0.97f && (_timer.time + 1) % 1 < 1f && _timer.time < 5)
+                {
+                    SFX.Play(GetPath("LastSec.wav"), 1f, 0f, 0f, false);
+                }
+                if (!(Level.current is Editor))
+                {
+                    if (_timer == null)
                     {
-                        if (gm != _timer)
+                        _timer = new GMTimer(position.x, position.y - 16f)
                         {
-                            Level.Remove(gm);
+                            anchor = this,
+                            depth = 0.95f,
+                            progressBar = true,
+                            progressBarType = ProgressBarType.KeyPoint,
+                            progressTarget = SafesToWin,
+                            time = RoundTime
+                        };
+                        Level.Add(_timer);
+                        Fondle(_timer);
+                        _timer.Resume();
+                    }
+                    foreach (GMTimer gm in Level.current.things[typeof(GMTimer)])
+                    {
+                        if (gm != null && _timer != null)
+                        {
+                            if (gm != _timer)
+                            {
+                                Level.Remove(gm);
+                            }
                         }
                     }
-                }
-                if (time > 0f)
-                {
-                    if (_timer != null)
+                    if (!winnerDefined && contestedSafes >= SafesToWin)
                     {
-                        _timer.time = time;
-                        Fondle(_timer);
+                        TerroristWin();
+                        SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
                     }
-                    _string = Convert.ToString(time);
-                    time -= 0.0166666f;
+                    else if (contestedSafes < SafesToWin && _timer.time <= 0f && !winnerDefined)
+                    {
+                        CounterTerroristWin();
+                        SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
+                    }
                 }
-                if (ctWins == false && tWins == false && contestedSafes >= SafesToWin)
-                {
-                    TerroristWin();
-                    tWins = true;
-                    SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
-                }
-                else if (contestedSafes < SafesToWin && time <= 0f && ctWins == false && tWins == false)
-                {
-                    CounterTerroristWin();
-                    ctWins = true;
-                    SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
-                }
-            }
-            if (ctWins == true)
-            {
-                CounterTerroristWin();
-            }
-            else if (tWins == true)
-            {
-                TerroristWin();
             }
         }
         public void TerroristWin()
@@ -196,6 +166,7 @@ namespace DuckGame.C44P
         }
         public void TeamWin(Team t)
         {
+            winnerDefined = true;
             foreach (Profile profile in DuckNetwork.profiles)
             {
                 if (profile.team == t && !GameMode.lastWinners.Contains(profile))

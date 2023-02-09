@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace DuckGame.C44P
 {
+	//Dirty code from duck game with some removals
+
+
 	[EditorGroup("Stuff|Doors", EditorItemType.Debug)]
 	public class WallDoor : Thing
 	{

@@ -6,11 +6,30 @@ namespace DuckGame.C44P
     {
         private BitmapFont _font;
 
-        public float time; 
         public string str;
         public string subtext;
 
-        public StateBinding _TimerBind = new StateBinding("time", -1, false, false);
+        private float _time; 
+        public float time 
+        { 
+            get 
+            { 
+                return _time;
+            }
+            set
+            {
+                if (value < 0)
+                {
+                    _time = 0;
+                }
+                _time = value;
+            }
+        }
+
+
+        private bool isTimerActive;
+
+        public StateBinding _TimerBind = new StateBinding("_time", -1, false, false);
         public StateBinding _StringBind = new StateBinding("str", -1, false, false);
 
         public bool progressBar;
@@ -90,20 +109,40 @@ namespace DuckGame.C44P
             }
         }
 
+        public void Pause()
+        {
+            isTimerActive = false;
+        }
+        public void Resume()
+        {
+            isTimerActive = true;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if (isTimerActive)
+            {
+                time -= 0.01666666f;
+                if(time < 0)
+                {
+                    time = 0;
+                    isTimerActive = false;
+                }
+            }
+        }
+
         public override void Draw()
         {
             Vec2 camPos = new Vec2(Level.current.camera.position.x, Level.current.camera.position.y);
             Vec2 camSize = new Vec2(Level.current.camera.width, Level.current.camera.height);
             Vec2 textPos = camPos + camSize * new Vec2(0.5f, 0.015f);
+
             _font.scale = Level.current.camera.size / new Vec2(480, 270);
 
-            int TimeInInt = (int)time;
-            int mins = 0;
-            for (int i = 0; TimeInInt > 59; i++)
-            {
-                mins += 1;
-                TimeInInt -= 60;
-            }
+            int mins = (int)time / 60;
+            int seconds = (int)time % 60;
+            
             string text = "";
             if(str != null && str != "")
             {
@@ -113,14 +152,15 @@ namespace DuckGame.C44P
                 Graphics.DrawStringOutline(text, new Vec2(xpos, textPos.y), col, Color.Black, 0.9f, null, _font.scale.x);
                 return;
             }
-            if (TimeInInt > 9)
-                text = Convert.ToString(mins) + ":" + Convert.ToString(TimeInInt);
-            else if (TimeInInt < 10)
-                text = Convert.ToString(mins) + ":0" + Convert.ToString(TimeInInt);
+            text = Convert.ToString(mins) + ":";
+            if (seconds < 10)
+                text += "0";
+             text += Convert.ToString(seconds);
+
             float xposit = textPos.x - _font.GetWidth(text, false, null) / 2f;
 
             Color c = Color.White;
-            if ((TimeInInt % 2 == 1 && TimeInInt < 10) && mins == 0)
+            if ((int)time % 2 == 1 && (int)time < 10)
             {
                 c = Color.Red;
             }

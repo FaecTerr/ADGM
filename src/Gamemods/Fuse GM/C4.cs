@@ -7,21 +7,25 @@ namespace DuckGame.C44P
     public class C4 : Holdable
     {
         public SpriteMap _sprite;
-        public bool planted = false;
+        public List<Bullet> firedBullets = new List<Bullet>();
+
         public float holden = 0f;
         public float C4timer = 25f;
         public float defuse = 0f;
+
+        public bool planted = false;
         public bool defused = false;
         public bool coZone = false;
-        public List<Bullet> firedBullets = new List<Bullet>();
 
         public C4(float xval, float yval) : base(xval, yval)
         {
-            center = new Vec2(8f, 6f);
             weight = 0f;
-            collisionOffset = new Vec2(-4f, -6f);
-            collisionSize = new Vec2(8f, 10f);
             _editorName = "Non-GM C4";
+
+            collisionSize = new Vec2(8f, 10f);
+            collisionOffset = new Vec2(-4f, -6f);
+            center = new Vec2(8f, 6f);
+
             _sprite = new SpriteMap(GetPath("Sprites/Gamemods/FuseMode/C4"), 16, 12, false);
             base.graphic = new SpriteMap(GetPath("Sprites/Gamemods/FuseMode/C4.png"), 16, 12, false);
             _sprite.AddAnimation("idle", 1f, true, new int[1]);
@@ -104,10 +108,7 @@ namespace DuckGame.C44P
                         }
                         if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05)
                         {
-                            foreach (Duck du in Level.current.things[typeof(Duck)])
-                            {
-                                DinamicSFX.PlayDef(du.position, position, 1f, 480, "SFX/bombbeep.wav");
-                            }
+                            SFX.Play(GetPath("SFX/bombbeep.wav"));
                             Level.Add(new ButtonsG(x, y - 24f));
                             d._disarmDisable = 0;
                         }
@@ -124,10 +125,7 @@ namespace DuckGame.C44P
                             holden += 0.0166666f;
                             if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05 && holden < 3)
                             {
-                                foreach (Duck du in Level.current.things[typeof(Duck)])
-                                {
-                                    DinamicSFX.PlayDef(du.position, position, 1f, 480, "SFX/bombbeep.wav");
-                                }
+                                SFX.Play(GetPath("SFX/bombbeep.wav"));
                                 Level.Add(new ButtonsG(x, y - 24f));
                                 d._disarmDisable = 5;
                             }
@@ -161,10 +159,7 @@ namespace DuckGame.C44P
                                 }
                                 if (defuse % 0.7 > 0.02 && defuse % 0.7 < 0.05 && defuse < 6)
                                 {
-                                    foreach (Duck duck in Level.current.things[typeof(Duck)])
-                                    {
-                                        DinamicSFX.PlayDef(duck.position, position, 1f, 480, "SFX/Defuse.wav");
-                                    }
+                                    SFX.Play(GetPath("SFX/Defuse.wav"));
                                     du._disarmDisable = 5;
                                 }
                                 if (defuse >= 6f)
@@ -217,7 +212,7 @@ namespace DuckGame.C44P
             }
             for (int i = 0; i < num; i++)
             {
-                float dir = (float)i * 60f + Rando.Float(-10f, 10f);
+                float dir = i * 60f + Rando.Float(-10f, 10f);
                 float dist = Rando.Float(20f, 20f);
                 ExplosionPart ins = new ExplosionPart(position.x + (float)(Math.Cos((double)Maths.DegToRad(dir)) * (double)dist), position.y - (float)(Math.Sin((double)Maths.DegToRad(dir)) * (double)dist), true);
                 Level.Add(ins);
@@ -226,11 +221,11 @@ namespace DuckGame.C44P
             Graphics.FlashScreen();
             SFX.Play("explode", 1f, 0f, 0f, false);
 
-            if (base.isServerForObject)
+            if (isServerForObject)
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    float dir = (float)i * 18f - 5f + Rando.Float(10f);
+                    float dir = i * 18f - 5f + Rando.Float(10f);
                     ATShrapnel shrap = new ATShrapnel();
                     shrap.range = 160f + Rando.Float(8f);
                     Bullet bullet = new Bullet(position.x + (float)(Math.Cos((double)Maths.DegToRad(dir)) * 6.0), position.y - (float)(Math.Sin((double)Maths.DegToRad(dir)) * 6.0), shrap, dir, null, false, -1f, false, true);

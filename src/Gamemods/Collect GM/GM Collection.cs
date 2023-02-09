@@ -9,7 +9,6 @@
         private CollectingUI collecting;
 
         public bool Activate = false;
-        public float time = 120f;
         public bool winnerDefined;
         public string _string;
 
@@ -57,133 +56,132 @@
                     collecting.pointsTarget = maxPoints;
                 }
                 init = true;
-                time = RoundTime;
             }
 
-            if (_timer == null && !(Level.current is Editor) && time > 0f)
+            if (_timer == null && !(Level.current is Editor))
             {
                 _timer = (new GMTimer(position.x, position.y - 16f)
                 {
                     anchor = this,
-                    depth = 0.95f
+                    depth = 0.95f,
+                    time = RoundTime,
                 });
                 if(isServerForObject)
                     Level.Add(_timer);
+                _timer.Resume();
             }
 
-            if (time <= 0f)
+            if (_timer != null)
             {
                 //Win conditions
-                if (!winnerDefined)
+                if (_timer.time <= 0f)
                 {
-                    if (!NewTeamSystem)
+                    if (!winnerDefined)
                     {
-                        if (teamCollectibles[0] > teamCollectibles[1])
+                        if (!NewTeamSystem)
                         {
-                            CounterTerroristWin();
-                            winnerDefined = true;
-                        }
-                        else if (teamCollectibles[1] > teamCollectibles[0])
-                        {
-                            TerroristWin();
-                            winnerDefined = true;
+                            if (teamCollectibles[0] > teamCollectibles[1])
+                            {
+                                CounterTerroristWin();
+                                winnerDefined = true;
+                            }
+                            else if (teamCollectibles[1] > teamCollectibles[0])
+                            {
+                                TerroristWin();
+                                winnerDefined = true;
+                            }
+                            else
+                            {
+                                CounterTerroristWin();
+                                TerroristWin();
+                            }
                         }
                         else
                         {
-                            CounterTerroristWin();
-                            TerroristWin();
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < teamCollectibles.Length; i++)
-                        {
-                            if (teamCollectibles[i] >= maxPoints && !winnerDefined)
+                            for (int i = 0; i < teamCollectibles.Length; i++)
                             {
-                                
-                            }
-                        }
-                    }
-                }
-            }
-            for (int i = 0; i < teamCollectibles.Length; i++)
-            {
-                if (givePoint[i])
-                {
-                    teamCollectibles[i] += 0.01666666f;
-                    givePoint[i] = false;
-                }
-                if (giveExtra[i])
-                {
-                    if (collecting != null)
-                    {
-                        teamCollectibles[i] += AdditionalPoints;
-                    }
-                    giveExtra[i] = false;
-                }
-                if (!NewTeamSystem)
-                {
-                    if (teamCollectibles[0] >= maxPoints && !winnerDefined)
-                    {
-                        CounterTerroristWin();
-                        time = 0f;
-                        winnerDefined = true;
-                    }
-                    if (teamCollectibles[1] >= maxPoints && !winnerDefined)
-                    {
-                        TerroristWin();
-                        time = 0f;
-                        winnerDefined = true;
-                    }
-                }
-                else
-                {
-                    if (teamCollectibles[i] >= maxPoints && !winnerDefined)
-                    {
-                        //TODO
-                        //Flexible team win defining
-                    }
-                }
-                if (collecting != null)
-                {
-                    if (teamCollectibles[i] > maxPoints)
-                    {
-                        teamCollectibles[i] = maxPoints;
-                    }
-                    collecting.teamPoints[i] = teamCollectibles[i];
-                }
-            }
-
-            if (time > 0f)
-            {
-                time -= 0.0166666f;
-                if (_timer != null)
-                {
-                    _timer.time = time;
-                }
-
-                //That is super ugly piece of code tbh
-                foreach (CollectBase collectb in Level.current.things[typeof(CollectBase)])
-                {
-                    foreach (Collectible collectible in Level.current.things[typeof(Collectible)])
-                    {
-                        foreach (Duck d in Level.CheckRectAll<Duck>(collectb.topLeft, collectb.bottomRight))
-                        {
-                            if (d != null)
-                            {
-                                if (d.inputProfile.Released("SHOOT") && d.holdObject == collectible)
+                                if (teamCollectibles[i] >= maxPoints && !winnerDefined)
                                 {
-                                    collectible.SpawnItem();
-                                    giveExtra[collectb.team] = true;
+
                                 }
                             }
                         }
                     }
-                    foreach (Collectible collectible in Level.CheckRectAll<Collectible>(collectb.topLeft, collectb.bottomRight))
+                }
+                //Points system
+                for (int i = 0; i < teamCollectibles.Length; i++)
+                {
+                    if (givePoint[i])
                     {
-                        if (collectible != null)
+                        teamCollectibles[i] += 0.01666666f;
+                        givePoint[i] = false;
+                    }
+                    if (giveExtra[i])
+                    {
+                        if (collecting != null)
                         {
-                            givePoint[collectb.team] = true;
+                            teamCollectibles[i] += AdditionalPoints;
+                        }
+                        giveExtra[i] = false;
+                    }
+                    if (!NewTeamSystem)
+                    {
+                        if (teamCollectibles[0] >= maxPoints && !winnerDefined)
+                        {
+                            CounterTerroristWin();
+                            _timer.time = 0f;
+                            winnerDefined = true;
+                        }
+                        if (teamCollectibles[1] >= maxPoints && !winnerDefined)
+                        {
+                            TerroristWin();
+                            _timer.time = 0f;
+                            winnerDefined = true;
+                        }
+                    }
+                    else
+                    {
+                        if (teamCollectibles[i] >= maxPoints && !winnerDefined)
+                        {
+                            //TODO
+                            //Flexible team win defining
+                        }
+                    }
+                    if (collecting != null)
+                    {
+                        if (teamCollectibles[i] > maxPoints)
+                        {
+                            teamCollectibles[i] = maxPoints;
+                        }
+                        collecting.teamPoints[i] = teamCollectibles[i];
+                    }
+                }
+
+                if (_timer.time > 0f)
+                {
+                    //That is super ugly piece of code tbh
+                    foreach (CollectBase collectb in Level.current.things[typeof(CollectBase)])
+                    {
+                        foreach (Collectible collectible in Level.current.things[typeof(Collectible)])
+                        {
+                            foreach (Duck d in Level.CheckRectAll<Duck>(collectb.topLeft, collectb.bottomRight))
+                            {
+                                if (d != null)
+                                {
+                                    if (d.inputProfile.Released("SHOOT") && d.holdObject == collectible)
+                                    {
+                                        collectible.SpawnItem();
+                                        giveExtra[collectb.team] = true;
+                                    }
+                                }
+                            }
+                        }
+                        foreach (Collectible collectible in Level.CheckRectAll<Collectible>(collectb.topLeft, collectb.bottomRight))
+                        {
+                            if (collectible != null)
+                            {
+                                givePoint[collectb.team] = true;
+                            }
                         }
                     }
                 }

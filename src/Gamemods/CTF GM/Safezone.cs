@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
     [BaggedProperty("canSpawn", false)]
     [EditorGroup("ADGM|Furniture")]
@@ -35,12 +29,10 @@ namespace DuckGame.C44P
                 {
                     if (flipHorizontal)
                     {
-                        //po.velocity = new Vec2(1f, 0f);
                         po.hSpeed = -3f;
                     }
                     else
                     {
-                        //po.velocity = new Vec2(-1f, 0f);
                         po.hSpeed = 3f;
                     }
                 }

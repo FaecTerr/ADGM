@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DuckGame;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
     public class TeamCounter : Thing, IDrawToDifferentLayers
     {
@@ -59,12 +52,10 @@ namespace DuckGame.C44P
                         {
                             drawPosition.x += ((i % 1) - 0.5f) * 8.5f * Unit.x;
                             drawPosition.y += (i) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
-                            //drawPosition.y += (i / 2) * (flag.texture.height * lotOfTeamsIS - 2) / sameNumber[(int)count[i]] * Unit.y;
                         }
                         else
                         {
                             drawPosition.y += (i) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
-                            //drawPosition.y += (i) * (flag.texture.height / (lotOfTeamsIS - 1)) * ((lotOfTeamsIS - 1) / sameNumber[(int)count[i]]) * Unit.y;
                         }
 
                         flag.frame = team[i];

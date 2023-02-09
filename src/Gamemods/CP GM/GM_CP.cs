@@ -11,7 +11,6 @@ namespace DuckGame.C44P
         public EditorProperty<float> RoundTime;
         public EditorProperty<float> ContestTime;
 
-        public string _string;
         public float contest;
         public float time = 90f;
 
@@ -19,11 +18,10 @@ namespace DuckGame.C44P
         public bool uncontesting; 
 
         public bool Activate = false;
-        public bool ctWins = false;
-        public bool tWins = false;
+        public bool winnerDefined;
         public bool init = false;
 
-        public GM_CP(float xval, float yval, GMTimer gmt) : base(xval, yval)
+        public GM_CP(float xval, float yval) : base(xval, yval)
         {
             _sprite = new SpriteMap(Mod.GetPath<C44P>("Sprites/Gamemods/GameMode.png"), 16, 16, false);
             base.graphic = _sprite;
@@ -32,7 +30,7 @@ namespace DuckGame.C44P
             collisionSize = new Vec2(15f, 15f);
             graphic = _sprite;
             _visibleInGame = false;
-            _timer = gmt;
+
             layer = Layer.Foreground;
             RoundTime = new EditorProperty<float>(90f, this, 20f, 180f, 1f, null);
             ContestTime = new EditorProperty<float>(15f, this, 5f, 30f, 5f, null) { name = "Time to capture"};
@@ -48,38 +46,36 @@ namespace DuckGame.C44P
             {
                 _timer.progress = contest / ContestTime;
             }
-            if (init == false)
+            if (!init)
             {
                 init = true;
                 time = RoundTime;
             }
-            if (contesting == true && uncontesting == false)
+
+            if (contesting && !uncontesting)
             {
                 if (contest <= ContestTime)
                 {
                     contest += 0.01666666f;
                 }
             }
-            if (contesting == false && tWins == false)
+            if (!contesting && !winnerDefined)
             {
                 if (contest > 0f)
                 {
                     contest -= 0.01666666f;
                 }
             }
-            if (_timer != null && contest <= 0f)
-            {
-                _timer.str = "";
-            }
-            if ((time >= 14.97f && time < 15f) && contest <= 0f)
+
+            if (time >= 14.97f && time < 15f && contest <= 0f)
             {
                 SFX.Play(GetPath("15sec.wav"), 1f, 0f, 0f, false);
             }
-            if ((time >= 9.97f && time < 10f) && contest <= 0f)
+            if (time >= 9.97f && time < 10f && contest <= 0f)
             {
                 SFX.Play(GetPath("10sec.wav"), 1f, 0f, 0f, false);
             }
-            if (((time >= 4.97f && time < 5f) || (time >= 3.97f && time < 4f) || (time >= 2.97f && time < 3f) || (time >= 1.97f && time < 2f) || (time >= 0.97f && time < 1f)) && contest <= 0f)
+            if ((time + 1) % 1 >= 0.97f && (time + 1) % 1 < 1f && time < 5 && contest <= 0f)
             {
                 SFX.Play(GetPath("LastSec.wav"), 1f, 0f, 0f, false);
             }
@@ -87,12 +83,13 @@ namespace DuckGame.C44P
             {
                 if (_timer == null && !(Level.current is Editor))
                 {
-                    _timer = (new GMTimer(position.x, position.y - 16f)
+                    _timer = new GMTimer(position.x, position.y - 16f)
                     {
                         anchor = this,
                         depth = 0.95f,
-                        progressBar = true
-                    });
+                        progressBar = true,
+                        time = RoundTime                        
+                    };
                     Level.Add(_timer);
                     Fondle(_timer);
                 }
@@ -106,37 +103,20 @@ namespace DuckGame.C44P
                         }
                     }
                 }
-                if (time > 0f)
+
+                if (_timer != null)
                 {
-                    if (_timer != null)
+                    if (contest >= ContestTime && !winnerDefined)
                     {
-                        _timer.time = time;
-                        Fondle(_timer);
+                        TerroristWin();
+                        SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
                     }
-                    _string = Convert.ToString(time);
-                    time -= 0.0166666f;
+                    else if (contest <= 0f && _timer.time <= 0f && !winnerDefined)
+                    {
+                        CounterTerroristWin();
+                        SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
+                    }
                 }
-                if (contest >= ContestTime && ctWins == false && tWins == false)
-                {
-                    TerroristWin();
-                    tWins = true;
-                    SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
-                }
-                else if (contest <= 0f && time <= 0f && ctWins == false && tWins == false)
-                {
-                    CounterTerroristWin();
-                    ctWins = true;
-                    SFX.Play(GetPath("GameEnd.wav"), 1f, 0f, 0f, false);
-                }
-            }
-            if (ctWins == true)
-            {
-                CounterTerroristWin();
-                contest = 0f;
-            }
-            else if (tWins == true)
-            {
-                TerroristWin();
             }
             contesting = false;
             uncontesting = false;
@@ -185,6 +165,7 @@ namespace DuckGame.C44P
         }
         public void TeamWin(Team t)
         {
+            winnerDefined = true;
             foreach (Profile profile in DuckNetwork.profiles)
             {
                 if (profile.team == t && !GameMode.lastWinners.Contains(profile))

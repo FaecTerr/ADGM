@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DuckGame;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
     [EditorGroup("ADGM|GameMode Fuse")]
     public class Defuser : Holdable
@@ -30,7 +23,7 @@ namespace DuckGame.C44P
                 if (owner != null)
                 {
                     Duck d = owner as Duck;
-                    if (!(d.HasEquipment(typeof(CTEquipment))))
+                    if (!d.HasEquipment(typeof(CTEquipment)))
                     {
                         d.doThrow = true;
                     }
@@ -38,7 +31,7 @@ namespace DuckGame.C44P
                 if (prevOwner != null)
                 {
                     Duck d = prevOwner as Duck;
-                    if (!(d.HasEquipment(typeof(CTEquipment))))
+                    if (!d.HasEquipment(typeof(CTEquipment)))
                     {
                         hSpeed = 0f;
                     }

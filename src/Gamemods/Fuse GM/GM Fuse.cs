@@ -111,41 +111,37 @@ namespace DuckGame.C44P
                     }
                 }
             }
-            if(ctWins == true)
+            if(ctWins)
             {
                 CounterTerroristWin();
             }
-            else if(tWins == true)
+            else if(tWins)
             {
                 TerroristWin();
             }
             
             if (_c4 != null && !(Level.current is Editor))
             {
-                if(_c4.planted == true)
+                if(_c4.planted)
                 {
                     planted = true;
                     _timer.subtext = "Planted";
                 }
-                if(planted == false)
+                if(!planted)
                 {
                     if (_timer != null)
                     {
                         _timer.str = "";
                     }
                 }
-                if(_c4.defused == true)
+                if(_c4.defused)
                 {
-                    defused = true;
+                    defused = true; Fondle(_timer);
+                    Level.Remove(_timer);
                 }
-                if(defused == true)
+                if(defused)
                 {
                     _c4.defused = true;
-                }
-                if ((_c4.defused == true))
-                {
-                    Fondle(_timer);
-                    Level.Remove(_timer);
                 }
                 if (time > 0f)
                 {
@@ -157,25 +153,25 @@ namespace DuckGame.C44P
                     _string = Convert.ToString(time);
                     time -= 0.0166666f;
                 }
-                if (_c4.planted == true && Activate == false)
+                if (_c4.planted && !Activate)
                 {
                     time = ExplosionTime;
                     Activate = true;
                     _c4.C4timer = ExplosionTime;
                 }
-                if (_c4.planted == true && time <= 0f && ctWins == false && tWins == false)
+                if (_c4.planted && time <= 0f && !ctWins && !tWins)
                 {
                     TerroristWin();
                     tWins = true;
                     SFX.Play(GetPath("SFX/GameEnd.wav"), 1f, 0f, 0f, false);
                 }
-                else if (_c4.planted == false && time <= 0f && ctWins == false && tWins == false)
+                else if (_c4.planted == false && time <= 0f && !ctWins && tWins)
                 {
                     CounterTerroristWin();
                     ctWins = true;
                     SFX.Play(GetPath("SFX/GameEnd.wav"), 1f, 0f, 0f, false);
                 }
-                if (_c4.defused == true && ctWins == false && tWins == false)
+                if (_c4.defused == true && !ctWins && !tWins)
                 {
                     CounterTerroristWin();
                     ctWins = true;

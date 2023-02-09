@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DuckGame.C44P
+﻿namespace DuckGame.C44P
 {
 	[EditorGroup("ADGM|Guns")]
 	[BaggedProperty("isInDemo", true)]
