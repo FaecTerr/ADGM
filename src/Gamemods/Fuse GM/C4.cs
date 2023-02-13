@@ -17,6 +17,10 @@ namespace DuckGame.C44P
         public bool defused = false;
         public bool coZone = false;
 
+        bool ableToPlant;
+        bool ableToDefuse;
+        float keyVisibility;
+
         public C4(float xval, float yval) : base(xval, yval)
         {
             weight = 0f;
@@ -98,40 +102,60 @@ namespace DuckGame.C44P
                 }
                 if (!coZone)
                 {
-                    if (d.inputProfile.Down("SHOOT") && !planted && d.crouch && d.grounded)
+                    if (!planted && d.crouch && d.grounded)
                     {
-                        d._disarmDisable = 5;
-                        holden += 0.0166666f;
-                        if (holden >= 2.5f)
+                        ableToPlant = true;
+                        if (d.inputProfile.Down("SHOOT"))
                         {
+                            d._disarmDisable = 5;
+                            holden += 0.0166666f;
+                            if (holden >= 2.5f)
+                            {
 
-                        }
-                        if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05)
-                        {
-                            SFX.Play(GetPath("SFX/bombbeep.wav"));
-                            Level.Add(new ButtonsG(x, y - 24f));
-                            d._disarmDisable = 0;
+                            }
+                            if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05)
+                            {
+                                SFX.Play(GetPath("SFX/bombbeep.wav"));
+                                Level.Add(new ButtonsG(x, y - 24f));
+                                d._disarmDisable = 0;
+                            }
                         }
                     }
+                    else
+                    {
+                        ableToPlant = false;
+                    }
                 }
-                else if (coZone)
+                else
                 {
                     PlantZone pz = Level.CheckRect<PlantZone>(topLeft, bottomRight);
                     if (pz != null)
                     {
-                        if (d.inputProfile.Down("SHOOT") && !planted && d.crouch && d.grounded && pz.Custom)
+                        if (d.crouch && d.grounded && pz.Custom && !planted)
                         {
-                            d._disarmDisable = 5;
-                            holden += 0.0166666f;
-                            if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05 && holden < 3)
+                            ableToPlant = true;
+                            if (d.inputProfile.Down("SHOOT"))
                             {
-                                SFX.Play(GetPath("SFX/bombbeep.wav"));
-                                Level.Add(new ButtonsG(x, y - 24f));
                                 d._disarmDisable = 5;
+                                holden += 0.0166666f;
+                                if (holden % 0.3 > 0.02 && holden % 0.3 < 0.05 && holden < 3)
+                                {
+                                    SFX.Play(GetPath("SFX/bombbeep.wav"));
+                                    Level.Add(new ButtonsG(x, y - 24f));
+                                    d._disarmDisable = 5;
+                                }
                             }
+                        }
+                        else
+                        {
+                            ableToPlant = false;
                         }
                     }
                 }
+            }
+            else
+            {
+                ableToPlant = false;
             }
             if (planted)
             { 
@@ -143,43 +167,56 @@ namespace DuckGame.C44P
                 }
                 if (grounded && C4timer > 0f && !defused)
                 {
-                    foreach (Duck du in Level.CheckRectAll<Duck>(new Vec2(position.x - 10f, position.y + 2f), new Vec2(position.x + 10f, position.y - 6f)))
+                    ableToDefuse = false;
+                    float defuseSpeed = 0;
+                    foreach (CTEquipment cte in Level.CheckRectAll<CTEquipment>(new Vec2(position.x - 10f, position.y + 2f), new Vec2(position.x + 10f, position.y - 6f)))
                     {
-                        Defuser def = Level.CheckRect<Defuser>(new Vec2(position.x - 10f, position.y + 2f), new Vec2(position.x + 10f, position.y - 6f));
-                        if (du != null)
+                        if (cte.equippedDuck != null)
                         {
-                            if (du.crouch && du.HasEquipment(typeof(CTEquipment)))
+                            if (cte.equippedDuck.holdObject == null || cte.equippedDuck.holdObject is Defuser)
                             {
-                                du.hSpeed *= 0.9f;
-                                defuse += 0.0166666f;
-                                Level.Add(new DefuseFore(position.x, position.y - 6f, 0.01666f, (int)defuse));
-                                if (du.holdObject is Defuser)
+                                ableToDefuse = true;
+                            }
+                            if (cte.equippedDuck.inputProfile.Down("SHOOT"))
+                            {
+                                if (cte.equippedDuck.holdObject == null)
                                 {
-                                    defuse += 0.0166666f;
+                                    defuseSpeed = 1;
                                 }
-                                if (defuse % 0.7 > 0.02 && defuse % 0.7 < 0.05 && defuse < 6)
+                                if (cte.equippedDuck.holdObject is Defuser)
                                 {
-                                    SFX.Play(GetPath("SFX/Defuse.wav"));
-                                    du._disarmDisable = 5;
+                                    defuseSpeed = 2;
                                 }
-                                if (defuse >= 6f)
-                                {
-                                    defused = true;
-                                    SFX.Play(GetPath("bombdefused.wav"), 1f, 0f, 0f, false);
-                                    defuse = 0f;
-                                }
+                                cte.equippedDuck.hSpeed = 0;
                             }
                         }
-                        else if(def == null)
+                    }
+                    if(defuseSpeed > 0)
+                    {
+                        defuse += 0.0166666f * defuseSpeed;
+
+                        if (defuse % 0.7 > 0.02 && defuse % 0.7 < 0.05 && defuse < 6)
                         {
-                            defuse -= 0.00844444f;
+                            SFX.Play(GetPath("SFX/Defuse.wav"));
+                            Level.Add(new DefuseFore(position.x, position.y - 6f, 0.5f, (int)defuse));
                         }
-                        else
+
+                        if (defuse >= 6f)
                         {
-                            defuse -= 0.00422222f;
+                            defused = true;
+                            SFX.Play(GetPath("bombdefused.wav"), 1f, 0f, 0f, false);
+                            defuse = 0f;
                         }
                     }
+                    else
+                    {
+                        defuse = 0;
+                    }
                 }
+            }
+            if (defused)
+            {
+                ableToDefuse = false;
             }
             if(removedFromFall)
             {
@@ -239,6 +276,24 @@ namespace DuckGame.C44P
                     }
                     Level.Remove(this);
                 }
+            }
+        }
+        public override void Draw()
+        {
+            base.Draw();
+            if (ableToPlant || ableToDefuse)
+            {
+                keyVisibility = Maths.LerpTowards(keyVisibility, 1, 0.04f);
+            }
+            else
+            {
+                keyVisibility = Maths.LerpTowards(keyVisibility, 0, 0.05f);
+            }
+
+            if (keyVisibility > 0)
+            {
+                string text = "@SHOOT@";
+                Graphics.DrawString(text, position + new Vec2(-6, -36), Color.White * keyVisibility);
             }
         }
     }

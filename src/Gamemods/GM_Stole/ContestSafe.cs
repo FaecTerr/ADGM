@@ -8,13 +8,20 @@ namespace DuckGame.C44P
     {
         public SpriteMap _sprite;
         public SpriteMap _letter;
+        Sprite cantUse = new Sprite("connectionX");
 
         public bool contested;
         public float contesting;
+        private float rangeOfUse = 32;
+
+        private bool ableToInteract = false;
+        private float keyVisibility;
 
         public EditorProperty<int> Letter;
         public ContestSafe(float xpos, float ypos) : base(xpos, ypos)
         {
+            cantUse.CenterOrigin();
+
             _sprite = new SpriteMap(Mod.GetPath<C44P>("Sprites/Gamemods/SafeStealing/Safe.png"), 32, 32, false);
             graphic = _sprite;
             _sprite.frame = 0;
@@ -45,10 +52,19 @@ namespace DuckGame.C44P
         {
             if (contested == false) 
             {
-                Duck d = Level.CheckCircle<Duck>(position, 32f);
-                if (d != null)
+                TEquipment equipment = Level.CheckCircle<TEquipment>(position, rangeOfUse);
+                if (equipment != null && equipment.equippedDuck != null)
                 {
-                    if (d.inputProfile.Down("SHOOT") && d.holdObject == null && d.HasEquipment(typeof(TEquipment)))
+                    keyVisibility = Maths.LerpTowards(keyVisibility, 1, 0.04f);
+                    if (equipment.equippedDuck.holdObject == null)
+                    {
+                        ableToInteract = true;
+                    }
+                    else
+                    {
+                        ableToInteract = false;
+                    }
+                    if (equipment.equippedDuck.inputProfile.Down("SHOOT") && equipment.equippedDuck.holdObject == null)
                     {
                         if(contesting == 0)
                         {
@@ -66,11 +82,11 @@ namespace DuckGame.C44P
                     if (contesting > 4f)
                     {
                         contested = true;
-                        if (d.position.x < position.x)
+                        if (equipment.equippedDuck.position.x < position.x)
                         {
                             _sprite.SetAnimation("left");
                         }
-                        if (d.position.x > position.x)
+                        if (equipment.equippedDuck.position.x > position.x)
                         {
                             _sprite.SetAnimation("right");
                         }
@@ -78,6 +94,7 @@ namespace DuckGame.C44P
                 }
                 else
                 {
+                    keyVisibility = Maths.LerpTowards(keyVisibility, 0, 0.05f);
                     contesting = 0f;
                     _sprite.SetAnimation("idle");
                 }
@@ -92,68 +109,89 @@ namespace DuckGame.C44P
         {
             base.Draw();
 
-            if (contesting > 0 && !contested)
+            if (!contested)
             {
-                int TexHeight = 17;
-                int TexWidth = 17;
-
-                Tex2D tex = new Tex2D(TexWidth, TexHeight);
-
-                Color[] texArray = new Color[TexWidth * TexHeight];
-
-                for (int i = 0; i < TexHeight; i++)
+                if (contesting > 0)
                 {
-                    for (int j = 0; j < TexWidth; j++)
+                    keyVisibility = Maths.LerpTowards(keyVisibility, 0, 0.05f);
+
+                    int TexHeight = 17;
+                    int TexWidth = 17;
+
+                    Tex2D tex = new Tex2D(TexWidth, TexHeight);
+
+                    Color[] texArray = new Color[TexWidth * TexHeight];
+
+                    for (int i = 0; i < TexHeight; i++)
                     {
-                        float pixAlpha = 0.7f;
-
-                        double polarAngle = 0;
-                        double polarX = (i - TexHeight * 0.5f);
-                        double polarY = (j - TexWidth * 0.5f);
-
-                        double polarRange = Math.Sqrt(polarX * polarX + polarY * polarY);
-
-                        if (polarX != 0)
+                        for (int j = 0; j < TexWidth; j++)
                         {
-                            if (polarX > 0 && polarY >= 0)
+                            float pixAlpha = 0.7f;
+
+                            double polarAngle = 0;
+                            double polarX = (i - TexHeight * 0.5f);
+                            double polarY = (j - TexWidth * 0.5f);
+
+                            double polarRange = Math.Sqrt(polarX * polarX + polarY * polarY);
+
+                            if (polarX != 0)
                             {
-                                polarAngle = Math.Atan(polarY / polarX);
+                                if (polarX > 0 && polarY >= 0)
+                                {
+                                    polarAngle = Math.Atan(polarY / polarX);
+                                }
+                                if (polarX > 0 && polarY < 0)
+                                {
+                                    polarAngle = Math.Atan(polarY / polarX) + Math.PI * 2;
+                                }
+                                if (polarX < 0)
+                                {
+                                    polarAngle = Math.Atan(polarY / polarX) + Math.PI;
+                                }
                             }
-                            if (polarX > 0 && polarY < 0)
+                            else
                             {
-                                polarAngle = Math.Atan(polarY / polarX) + Math.PI * 2;
+                                if (polarY != 0)
+                                {
+                                    polarAngle = Math.PI * (1 - 0.5f * Math.Sign(polarY));
+                                }
                             }
-                            if (polarX < 0)
-                            {
-                                polarAngle = Math.Atan(polarY / polarX) + Math.PI;
-                            }
-                        }
-                        else
-                        {
-                            if (polarY != 0)
-                            {
-                                polarAngle = Math.PI * (1 - 0.5f * Math.Sign(polarY));
-                            }
-                        }
 
 
-                        if (polarAngle > (contesting / 4f) * Math.PI * 2 || polarRange > 8.5f || polarRange < 6.5f)
-                        {
-                            pixAlpha = 0;
-                        }
+                            if (polarAngle > (contesting / 4f) * Math.PI * 2 || polarRange > 8.5f || polarRange < 6.5f)
+                            {
+                                pixAlpha = 0;
+                            }
 
-                        texArray[i * TexWidth + j] = new Color(255, 255, 255) * pixAlpha;
+                            texArray[i * TexWidth + j] = new Color(255, 255, 255) * pixAlpha;
+                        }
                     }
+                    tex.SetData(texArray);
+
+                    Sprite circle = new Sprite(tex);
+                    circle.CenterOrigin();
+
+                    Graphics.Draw(circle, position.x, position.y - 21f);
                 }
-                tex.SetData(texArray);
-
-                Sprite circle = new Sprite(tex);
-                circle.CenterOrigin();
-
-                Graphics.Draw(circle, position.x, position.y - 21f);
+                DrawKey();
+                _letter.frame = Letter;
+                Graphics.Draw(_letter, position.x, position.y - 21f);
             }
-            _letter.frame = Letter;
-            Graphics.Draw(_letter, position.x, position.y - 21f);
+        }
+        void DrawKey()
+        {
+            if (keyVisibility > 0)
+            {
+                if (ableToInteract)
+                {
+                    Graphics.DrawString("@SHOOT@", position + new Vec2(-6, -36), Color.White * keyVisibility);
+                }
+                else
+                {
+                    cantUse.alpha = keyVisibility;
+                    Graphics.Draw(cantUse, position.x, position.y - 32);
+                }
+            }
         }
     }
 }

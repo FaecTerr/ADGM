@@ -14,7 +14,7 @@
             _sprite = new SpriteMap(GetPath("Sprites/Gamemods/FuseMode/Defuser"), 14, 11, false);
             base.graphic = new SpriteMap(GetPath("Sprites/Gamemods/FuseMode/Defuser.png"), 14, 11, false);
             weight = 0f;
-            onlyCT = new EditorProperty<bool>(false);
+            onlyCT = new EditorProperty<bool>(true);
         }
         public override void Update()
         {

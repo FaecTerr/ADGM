@@ -61,6 +61,21 @@ namespace DuckGame.C44P
                     }
                 }
             }
+            if (_timer == null && !(Level.current is Editor))
+            {
+                _timer = new GMTimer(position.x, position.y - 16f)
+                {
+                    anchor = this,
+                    depth = 0.95f,
+                    progressBar = true,
+                    progressBarType = ProgressBarType.KeyPoint,
+                    progressTarget = SafesToWin,
+                    time = RoundTime
+                };
+                Level.Add(_timer);
+                Fondle(_timer);
+                _timer.Resume();
+            }
             if (_timer != null)
             {
                 if (_timer.time > 0f)
@@ -84,21 +99,6 @@ namespace DuckGame.C44P
                 }
                 if (!(Level.current is Editor))
                 {
-                    if (_timer == null)
-                    {
-                        _timer = new GMTimer(position.x, position.y - 16f)
-                        {
-                            anchor = this,
-                            depth = 0.95f,
-                            progressBar = true,
-                            progressBarType = ProgressBarType.KeyPoint,
-                            progressTarget = SafesToWin,
-                            time = RoundTime
-                        };
-                        Level.Add(_timer);
-                        Fondle(_timer);
-                        _timer.Resume();
-                    }
                     foreach (GMTimer gm in Level.current.things[typeof(GMTimer)])
                     {
                         if (gm != null && _timer != null)

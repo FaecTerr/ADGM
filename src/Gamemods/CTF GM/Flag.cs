@@ -21,6 +21,10 @@ namespace DuckGame.C44P
         public bool init;
         
         public EditorProperty<int> team;
+
+        bool ableToInteract;
+        float keyVisibility;
+
         public Flag(float xval, float yval) : base(xval, yval)
         {
             _sprite = new SpriteMap(GetPath("Sprites/Gamemods/CTF/FlagPole.png"), 11, 51, false);
@@ -62,6 +66,8 @@ namespace DuckGame.C44P
             _sprite.flipH = flag.scale.x < 0;
             flag.frame = Team;
 
+            ableToInteract = false;
+
             if (based == true)
             {
                 if (owner != null)
@@ -71,6 +77,9 @@ namespace DuckGame.C44P
                     flag.scale = new Vec2(-owner.offDir, scale.y);
                     anchor = owner;
                     position.x = anchor.position.x - owner.offDir * 6;
+
+                    ableToInteract = true;
+
                     if (owner.inputProfile.Pressed("STRAFE")) //drop
                     {
                         anchor = this;
@@ -116,6 +125,7 @@ namespace DuckGame.C44P
                         {
                             if (dgTeam != duckling.team)
                             {
+                                ableToInteract = true;
                                 if (duckling.inputProfile.Pressed("STRAFE")) //pickup
                                 {
                                     owner = duckling;
@@ -152,6 +162,28 @@ namespace DuckGame.C44P
                 flag.frame = team - 1;
             }
 
+            DrawKey();
+            DrawFlag();
+        }
+        void DrawKey()
+        {
+            if (ableToInteract)
+            {
+                keyVisibility = Maths.LerpTowards(keyVisibility, 1, 0.04f);
+            }
+            else
+            {
+                keyVisibility = Maths.LerpTowards(keyVisibility, 0, 0.05f);
+            }
+
+            if (keyVisibility > 0)
+            {
+                string text = "@STRAFE@";
+                Graphics.DrawString(text, position + new Vec2(-6, -36), Color.White * keyVisibility);
+            }
+        }
+        void DrawFlag()
+        {            
             //Taking flag sprite from spritesheet
             int TexHeight = 18;
             int TexWidth = 27;
@@ -175,7 +207,6 @@ namespace DuckGame.C44P
             Sprite spr = new Sprite(prepTex);
             spr.flipH = flag.scale.x < 0;
 
-            //Drawing flag with 'windy' effect
             for (int i = 0; i < 14; i++)
             {
                 float sinOffset = (float)Math.Sin(Graphics.frame / 10f + i * 0.38f);
@@ -184,7 +215,7 @@ namespace DuckGame.C44P
                 float flagScale = 1;
                 float flagRotation = 0;
                 float flagHeight = 20;
-                if(owner != null)
+                if (owner != null)
                 {
                     flagScale = 0.5f;
                     flagOffsetX -= 1f;
@@ -194,14 +225,14 @@ namespace DuckGame.C44P
 
                 Vec2 flagStart = position + new Vec2((spr.flipH ? -flagOffsetX : flagOffsetX) * spr.scale.x, -flagHeight * spr.scale.y);
 
-                Graphics.Draw(spr.texture, 
-                    flagStart + new Vec2((i * 2) * scale.x * flagScale * (spr.flipH ? -1f : 1f), sinOffset * 3.8f * (i / 51f)), 
-                    new Rectangle?(new Rectangle((i * 2), 0f, 3f, 18f)), 
-                    Color.White, 
-                    flagRotation, 
-                    Vec2.Zero, 
-                    spr.flipH ? new Vec2(-scale.x, scale.y) * flagScale : new Vec2(scale) * flagScale, 
-                    SpriteEffects.None, 
+                Graphics.Draw(spr.texture,
+                    flagStart + new Vec2((i * 2) * scale.x * flagScale * (spr.flipH ? -1f : 1f), sinOffset * 3.8f * (i / 51f)),
+                    new Rectangle?(new Rectangle((i * 2), 0f, 3f, 18f)),
+                    Color.White,
+                    flagRotation,
+                    Vec2.Zero,
+                    spr.flipH ? new Vec2(-scale.x, scale.y) * flagScale : new Vec2(scale) * flagScale,
+                    SpriteEffects.None,
                     depth - 2);
             }
         }
