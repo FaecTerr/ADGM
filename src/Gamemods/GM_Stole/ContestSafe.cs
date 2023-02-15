@@ -4,7 +4,7 @@ namespace DuckGame.C44P
 {
     [BaggedProperty("canSpawn", false)]
     [EditorGroup("ADGM|GameMode ST")]
-    public class ContestSafe : PhysicsObject, IPlatform
+    public class ContestSafe : Block, IPlatform
     {
         public SpriteMap _sprite;
         public SpriteMap _letter;
@@ -12,12 +12,13 @@ namespace DuckGame.C44P
 
         public bool contested;
         public float contesting;
-        private float rangeOfUse = 32;
+        private float rangeOfUse = 24;
 
         private bool ableToInteract = false;
         private float keyVisibility;
 
         public EditorProperty<int> Letter;
+        public EditorProperty<bool> isBlock;
         public ContestSafe(float xpos, float ypos) : base(xpos, ypos)
         {
             cantUse.CenterOrigin();
@@ -44,9 +45,20 @@ namespace DuckGame.C44P
                 3
             });
             _letter.CenterOrigin();
+
             Letter = new EditorProperty<int>(0, this, 0, 4, 1, null);
+            isBlock = new EditorProperty<bool>(true);
 
             hugWalls = WallHug.Floor;
+        }
+        public override void Initialize()
+        {
+            base.Initialize();
+            if (!isBlock)
+            {
+                enablePhysics = true;
+                _solid = false;
+            }
         }
         public override void Update()
         {

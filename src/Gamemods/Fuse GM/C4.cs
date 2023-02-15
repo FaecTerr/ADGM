@@ -292,8 +292,7 @@ namespace DuckGame.C44P
 
             if (keyVisibility > 0)
             {
-                string text = "@SHOOT@";
-                Graphics.DrawString(text, position + new Vec2(-6, -36), Color.White * keyVisibility);
+                Graphics.DrawString("@SHOOT@", position + new Vec2(-6, -36), Color.White * keyVisibility);
             }
         }
     }
