@@ -6,7 +6,7 @@ namespace DuckGame.C44P
     [BaggedProperty("isFatal", false)]
     public class FireGrenade : BaseGrenade
     {
-        private int charges = 24;
+        private int charges = 16;
         private float volume = 2f; 
         private float Time;
         public FireGrenade(float xval, float yval) : base(xval, yval)
@@ -59,15 +59,11 @@ namespace DuckGame.C44P
             {
                 if (Time > 0f)
                 {
-                    Time -= 0.01666666f;
+                    Time -= 0.02f;
                 }
                 else
                 {
                     Time = 0.4f;
-                    if (charges > 25)
-                    {
-                        Time = 0.25f;
-                    }
                     PourOut();
                     charges--;
                 }

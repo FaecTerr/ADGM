@@ -37,7 +37,7 @@ namespace DuckGame.C44P
             SafesToWin = new EditorProperty<int>(3, this, 1, 10, 1, null) { name = "Goal points"};
             Revive = new EditorProperty<bool>(false);
 
-            _editorName = "GM Thiefs";
+            _editorName = "GM Theft";
         }
         public override void Update()
         {

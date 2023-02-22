@@ -46,8 +46,14 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>.\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="DuckGame">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Duck Game\DuckGame.exe</HintPath>
+    </Reference>
+    <Reference Include="HarmonyLoader">
+      <HintPath>content\HarmonyLoader.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
@@ -75,8 +81,9 @@
     <Compile Include="src\Gamemods\Collect GM\CollectingUI.cs" />
     <Compile Include="src\Gamemods\CP GM\ContestZone.cs" />
     <Compile Include="src\Gamemods\ForceTag.cs" />
-    <Compile Include="src\Furniture\ColoredBricks.cs" />
-    <Compile Include="src\Furniture\Desert.cs" />
+    <Compile Include="src\Tilesets\ColoredBricks.cs" />
+    <Compile Include="src\Tilesets\Cyberpunk.cs" />
+    <Compile Include="src\Tilesets\Desert.cs" />
     <Compile Include="src\Furniture\Furniture.cs" />
     <Compile Include="src\Furniture\Seats.cs" />
     <Compile Include="src\Gamemods\Fuse GM\DefuseFore.cs" />
@@ -99,6 +106,8 @@
     <Compile Include="src\Gamemods\CTF GM\TeamCounter.cs" />
     <Compile Include="src\Gamemods\CTF GM\Safezone.cs" />
     <Compile Include="src\Gamemods\Respawner.cs" />
+    <Compile Include="src\Main\HarmonyPathces.cs" />
+    <Compile Include="src\NetMessages\NMDuckRespawn.cs" />
     <Compile Include="src\TeamsSet\ModTeams.cs" />
     <Compile Include="src\Main\AutoUpdate.cs" />
     <Compile Include="src\Gamemods\Fuse GM\ButtonsG.cs" />
@@ -118,6 +127,7 @@
     <Compile Include="src\Furniture\Sofa.cs" />
     <Compile Include="src\Furniture\Tanker.cs" />
     <Compile Include="src\TeamsSet\TEquipment.cs" />
+    <Compile Include="src\Tilesets\Jungle.cs" />
     <Compile Include="src\Upstairs.cs" />
     <Compile Include="src\WallDoor.cs" />
     <Compile Include="src\Weapons\M16.cs" />

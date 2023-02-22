@@ -1,6 +1,6 @@
 ﻿namespace DuckGame.C44P
 {
-    [EditorGroup("ADGM|Tiles|Blocks")]
+    [EditorGroup("ADGM|Tiles|Bricks")]
     public class RedBrickTileset : AutoBlock
     {
         public RedBrickTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Bricks/RedBrick.png"))
@@ -12,7 +12,7 @@
             horizontalHeight = 14f;
         }
     }
-    [EditorGroup("ADGM|Tiles|Blocks")]
+    [EditorGroup("ADGM|Tiles|Bricks")]
     public class BlueBrickTileset : AutoBlock
     {
         public BlueBrickTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Bricks/BlueBrick.png"))

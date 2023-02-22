@@ -26,7 +26,11 @@ namespace DuckGame.C44P
         public static float globalA;
         public static float globalB;
         public static float globalC;
-        public static Tex2D CorrectTexture(Tex2D tex, bool recolor = false, Vec3 color = default(Vec3))
+
+		public static bool patched;
+		public static bool debug;
+
+		public static Tex2D CorrectTexture(Tex2D tex, bool recolor = false, Vec3 color = default(Vec3))
         {
             if (recolor)
                 return Graphics.Recolor(tex, color);
@@ -56,10 +60,10 @@ namespace DuckGame.C44P
                 {
                     DevConsole.Log(Teams.active[i].name);
                 }
-            })); 
+            }));
             DevConsole.AddCommand(new CMD("setargA", delegate ()
             {
-                
+
             }));
         }
 
@@ -72,7 +76,18 @@ namespace DuckGame.C44P
             copyLevels();
 
         }
-        
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+			debug = NetworkDebugger.enabled;
+			if (debug)
+			{
+				Patch();
+				patched = true;
+			}
+		}
+
         private byte[] GetMD5Hash(byte[] sourceBytes)
         {
             return new MD5CryptoServiceProvider().ComputeHash(sourceBytes);
@@ -82,7 +97,7 @@ namespace DuckGame.C44P
             while (Level.current == null || !(Level.current.ToString() == "DuckGame.TitleScreen") && !(Level.current.ToString() == "DuckGame.TeamSelect2"))
                 Thread.Sleep(200);
             upd = new updater();
-            AutoUpdatables.Add(upd);
+            //AutoUpdatables.Add(upd);
         }
         private static bool FilesAreEqual(FileInfo first, FileInfo second)
         {
@@ -131,7 +146,203 @@ namespace DuckGame.C44P
                 }
             }
         }
-    }
+		public static void AddLevels(string path = "")
+		{
+			foreach (string file in Directory.GetFiles(GetPath<C44P>("/Levels/" + path)))
+			{
+				if (!DuckNetwork.core._activatedLevels.Contains(file))
+				{
+					DuckNetwork.core._activatedLevels.Add(file);
+				}
+			}
+		}
+		public static void Patch()
+        {
+            Assembly Harmony = Assembly.Load(File.ReadAllBytes(GetPath<C44P>("HarmonyLoader") + ".dll"));
+            if (Harmony != null)
+            {
+                try
+                {
+                    Type t = Harmony.GetType("HarmonyLoader.Loader"); 
+                    MethodInfo Patch = t.GetMethod("Patch", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                    Patch.Invoke(null, new object[] { SGMI(typeof(TeamSelect2), "DefaultSettings"), SGMI(typeof(HarmonyPatches), "TeamSelect2DefaultSettings_Prefix"), null, null });
+                    Patch.Invoke(null, new object[] { SGMI(typeof(Duck), "Kill"), SGMI(typeof(HarmonyPatches), "DuckKill_Prefix"), null, null });
+                    Patch.Invoke(null, new object[] { SGMI(typeof(DuckNetwork), "CreateMatchSettingsInfoWindow"), null, SGMI(typeof(HarmonyPatches), "DuckNetworkCreateMatchSettingsInfoWindow_Postfix"), null }); 
+					if (debug) Patch.Invoke(null, new object[] { SGMI(typeof(DevConsole), "Update"), SGMI(typeof(SettingsInit), "Prefix"), null, null });
+				}
+                catch
+                {
+                    DevConsole.Log("Patching failed.", Color.Red, 2f, -1);
+                }
+            }
+        }
+        public static MethodInfo SGMI(Type type, string Methodname)
+        {
+            MethodInfo method = type.GetMethod(Methodname, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            return method;
+        }
+	}
+	internal static class SettingsInit
+	{
+		private static void Prefix()
+		{
+			if (Level.current is TeamSelect2)
+			{
+				if (DuckNetwork.core.matchSettings.Count() < 9)
+				{
+					DuckNetwork.core.matchSettings = new List<MatchSetting>
+					{
+						new MatchSetting
+						{
+							id = "requiredwins",
+							name = "Required Wins",
+							value = 15,
+							min = 5,
+							max = 100,
+							step = 5,
+							stepMap = new Dictionary<int, int>
+							{
+								{
+									50,
+									1
+								},
+								{
+									100,
+									10
+								},
+								{
+									500,
+									50
+								},
+								{
+									1000,
+									100
+								}
+							}
+						},
+						new MatchSetting
+						{
+							id = "restsevery",
+							name = "Rests Every",
+							value = 10,
+							min = 5,
+							max = 100,
+							step = 5,
+							stepMap = new Dictionary<int, int>
+							{
+								{
+									50,
+									1
+								},
+								{
+									100,
+									10
+								},
+								{
+									500,
+									50
+								},
+								{
+									1000,
+									100
+								}
+							}
+						},
+						new MatchSetting
+						{
+							id = "wallmode",
+							name = "Wall Mode",
+							value = false
+						},
+						new MatchSetting
+						{
+							id = "normalmaps",
+							name = "@NORMALICON@|DGBLUE|Normal Levels",
+							value = 90,
+							suffix = "%",
+							min = 0,
+							max = 100,
+							step = 5,
+							percentageLinks = new List<string>
+							{
+								"randommaps",
+								"custommaps",
+								"workshopmaps"
+							}
+						},
+						new MatchSetting
+						{
+							id = "randommaps",
+							name = "@RANDOMICON@|DGBLUE|Random Levels",
+							value = 10,
+							suffix = "%",
+							min = 0,
+							max = 100,
+							step = 5,
+							percentageLinks = new List<string>
+							{
+								"normalmaps",
+								"workshopmaps",
+								"custommaps"
+							}
+						},
+						new MatchSetting
+						{
+							id = "custommaps",
+							name = "@CUSTOMICON@|DGBLUE|Custom Levels",
+							value = 0,
+							suffix = "%",
+							min = 0,
+							max = 100,
+							step = 5,
+							percentageLinks = new List<string>
+							{
+								"normalmaps",
+								"randommaps",
+								"workshopmaps"
+							}
+						},
+						new MatchSetting
+						{
+							id = "workshopmaps",
+							name = "@RAINBOWICON@|DGBLUE|Internet Levels",
+							value = 0,
+							suffix = "%",
+							min = 0,
+							max = 100,
+							step = 5,
+							percentageLinks = new List<string>
+							{
+								"normalmaps",
+								"custommaps",
+								"randommaps"
+							}
+						},
+						new MatchSetting
+						{
+							id = "clientlevelsenabled",
+							name = "Client Maps",
+							value = false
+						},
+						new MatchSetting
+						{
+							id = "gamemode",
+							name = "Mode",
+							valueStrings = new List<string>() { "VANILLA", "FUSE", "CAPTURE THE FLAG", "CONTROL POINT", "COLLECTIBLE", "THEFT" },
+							value = 1,
+							min = 0,
+							max = 5,
+							step = 1,
+						}
+					};
+				}
+				else if (Network.isServer)
+				{
+					//Send.Message(new NMChangeModeRUDE((byte)(int)TeamSelect2.GetMatchSetting("gamemode").value));
+				}
+			}
+		}
+	}
 }
 
 

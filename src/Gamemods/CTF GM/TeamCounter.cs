@@ -20,7 +20,7 @@
 
         public void OnDrawLayer(Layer pLayer)
         {
-            if(pLayer == Layer.Foreground)
+            if (pLayer == Layer.Foreground)
             {
                 if (Timer != null)
                 {
@@ -35,34 +35,29 @@
                     flag.CenterOrigin();
                     flag.scale = Unit * 0.25f;
 
-                    int[] sameNumber = new int[8];
-
-                    for (int i = 0; i < Teams.active.Count; i++)
-                    {
-                        sameNumber[(int)count[i]]++;
-                    }
+                    int[] sameAmount = new int[8];
 
                     for (int i = 0; i < Teams.active.Count; i++)
                     {
                         Vec2 originalPosition = drawPosition;
                         drawPosition.x += -camSize.x * 0.15f + camSize.x * 0.3f * (count[i] / Timer.progressTarget);
 
-                        int lotOfTeamsIS = 4;
-                        if (sameNumber[(int)count[i]] > lotOfTeamsIS)
-                        {
-                            drawPosition.x += ((i % 1) - 0.5f) * 8.5f * Unit.x;
-                            drawPosition.y += (i) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
-                        }
-                        else
-                        {
-                            drawPosition.y += (i) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
-                        }
+                        drawPosition.y += (sameAmount[(int)count[i]]) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
 
                         flag.frame = team[i];
+                        Vec2 flagScale = flag.scale;
                         Graphics.Draw(flag, drawPosition.x, drawPosition.y);
+
+                        flag.color = Color.Black;
+                        flag.scale *= 1.1f;
+                        Graphics.Draw(flag, drawPosition.x, drawPosition.y);
+
+                        flag.color = Color.White;
+                        flag.scale = flagScale;
 
                         //Restoring position for next flag
                         drawPosition = originalPosition;
+                        sameAmount[(int)count[i]]++;
                     }
                 }
             }

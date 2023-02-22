@@ -1,6 +1,6 @@
 ﻿namespace DuckGame.C44P
 {
-    [EditorGroup("ADGM|Tiles|Background")]
+    [EditorGroup("ADGM|Tiles|Sand")]
     public class BackgroundDesert : BackgroundTile
     {
         public BackgroundDesert(float xpos, float ypos) : base(xpos, ypos)
@@ -13,7 +13,20 @@
             _editorName = "Sand";
         }
     }
-    [EditorGroup("ADGM|Tiles|Parallax")]
+    [EditorGroup("ADGM|Tiles|Sand")]
+    public class BackgroundCastle : BackgroundTile
+    {
+        public BackgroundCastle(float xpos, float ypos) : base(xpos, ypos)
+        {
+            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Jungle/castlePlus_background.png"), 16, 16, true);
+            _opacityFromGraphic = true;
+            center = new Vec2(8f, 8f);
+            collisionSize = new Vec2(16f, 16f);
+            collisionOffset = new Vec2(-8f, -8f);
+            _editorName = "Castle background";
+        }
+    }
+    [EditorGroup("ADGM|Tiles|Sand")]
     public class DesertParallax : BackgroundUpdater
     {
         public DesertParallax(float xpos, float ypos) : base(xpos, ypos)
@@ -83,13 +96,61 @@
             Level.Remove(_parallax);
         }
     }
-    [EditorGroup("ADGM|Tiles|Blocks")]
+    [EditorGroup("ADGM|Tiles|Sand")]
     public class DesertTileset : AutoBlock
     {
-        public DesertTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sand_less_saturated.png"))
+        public DesertTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sand.png"))
         {
             _editorName = "Sand";
             physicsMaterial = PhysicsMaterial.Metal;
+            verticalWidth = 10f;
+            verticalWidthThick = 12f;
+            horizontalHeight = 14f;
+        }
+    }
+    [EditorGroup("ADGM|Tiles|Sand")]
+    public class DesertCastleTileset : AutoBlock
+    {
+        public DesertCastleTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sandcastle.png"))
+        {
+            _editorName = "Sand Castle";
+            physicsMaterial = PhysicsMaterial.Metal;
+            verticalWidth = 10f;
+            verticalWidthThick = 12f;
+            horizontalHeight = 14f;
+        }
+    }
+    [EditorGroup("ADGM|Tiles|Sand")]
+    public class PalmTree : AutoPlatform
+    {
+        public PalmTree(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/palm.png"))
+        {
+            _editorName = "Palm tree";
+            physicsMaterial = PhysicsMaterial.Wood;
+            verticalWidth = 10f;
+            verticalWidthThick = 12f;
+            horizontalHeight = 14f;
+        }
+    }
+    [EditorGroup("ADGM|Tiles|Sand")]
+    public class Palm1 : AutoPlatform
+    {
+        public Palm1(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sandPalm_01.png"))
+        {
+            _editorName = "Palm leaves 1";
+            physicsMaterial = PhysicsMaterial.Wood;
+            verticalWidth = 10f;
+            verticalWidthThick = 12f;
+            horizontalHeight = 14f;
+        }
+    }
+    [EditorGroup("ADGM|Tiles|Sand")]
+    public class Palm2 : AutoPlatform
+    {
+        public Palm2(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sandPalm_02.png"))
+        {
+            _editorName = "Palm leaves 1";
+            physicsMaterial = PhysicsMaterial.Wood;
             verticalWidth = 10f;
             verticalWidthThick = 12f;
             horizontalHeight = 14f;

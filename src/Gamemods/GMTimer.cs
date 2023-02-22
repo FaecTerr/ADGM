@@ -210,7 +210,8 @@ namespace DuckGame.C44P
                 }
                 if(progressBarType == ProgressBarType.ScoreCompetition)
                 {
-                    Graphics.DrawLine(textPos + new Vec2(-camSize.x * 0.15f, 0), textPos + new Vec2(camSize.x * 0.15f, 0), Color.White, Unit.x * 0.5f, depth);
+                    Graphics.DrawLine(textPos + new Vec2(-camSize.x * 0.15f, 0), textPos + new Vec2(camSize.x * 0.15f, 0), Color.White, Unit.x * 0.5f, depth); 
+                    Graphics.DrawRect(textPos + new Vec2(-camSize.x * 0.15f - 0.5f * Unit.x, -0.5f * Unit.y), textPos + new Vec2(camSize.x * 0.15f + 0.5f * Unit.x, 0.5f * Unit.y), Color.Black, depth.Add(-1), true, 1);
                 }
             }
         }
