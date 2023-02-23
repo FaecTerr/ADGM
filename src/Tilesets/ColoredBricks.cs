@@ -8,7 +8,7 @@
             _editorName = "Red brick";
             physicsMaterial = PhysicsMaterial.Metal;
             verticalWidth = 10f;
-            verticalWidthThick = 12f;
+            verticalWidthThick = 15f;
             horizontalHeight = 14f;
         }
     }
@@ -20,7 +20,7 @@
             _editorName = "Blue brick";
             physicsMaterial = PhysicsMaterial.Metal;
             verticalWidth = 10f;
-            verticalWidthThick = 12f;
+            verticalWidthThick = 15f;
             horizontalHeight = 14f;
         }
     }

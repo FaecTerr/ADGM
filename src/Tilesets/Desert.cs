@@ -10,20 +10,7 @@
             center = new Vec2(8f, 8f);
             collisionSize = new Vec2(16f, 16f);
             collisionOffset = new Vec2(-8f, -8f);
-            _editorName = "Sand";
-        }
-    }
-    [EditorGroup("ADGM|Tiles|Sand")]
-    public class BackgroundCastle : BackgroundTile
-    {
-        public BackgroundCastle(float xpos, float ypos) : base(xpos, ypos)
-        {
-            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Jungle/castlePlus_background.png"), 16, 16, true);
-            _opacityFromGraphic = true;
-            center = new Vec2(8f, 8f);
-            collisionSize = new Vec2(16f, 16f);
-            collisionOffset = new Vec2(-8f, -8f);
-            _editorName = "Castle background";
+            _editorName = "BG Sand";
         }
     }
     [EditorGroup("ADGM|Tiles|Sand")]
@@ -104,22 +91,11 @@
             _editorName = "Sand";
             physicsMaterial = PhysicsMaterial.Metal;
             verticalWidth = 10f;
-            verticalWidthThick = 12f;
+            verticalWidthThick = 15f;
             horizontalHeight = 14f;
         }
     }
-    [EditorGroup("ADGM|Tiles|Sand")]
-    public class DesertCastleTileset : AutoBlock
-    {
-        public DesertCastleTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Desert/sandcastle.png"))
-        {
-            _editorName = "Sand Castle";
-            physicsMaterial = PhysicsMaterial.Metal;
-            verticalWidth = 10f;
-            verticalWidthThick = 12f;
-            horizontalHeight = 14f;
-        }
-    }
+
     [EditorGroup("ADGM|Tiles|Sand")]
     public class PalmTree : AutoPlatform
     {

@@ -4,72 +4,50 @@ using System.Reflection;
 
 namespace DuckGame.C44P
 {
-    [EditorGroup("ADGM|Tiles|Jungle")]
-    public class JunglePlatform : AutoPlatform
+    [EditorGroup("ADGM|Tiles|Castle")]
+    public class DesertCastleTileset : AutoBlock
     {
-        public JunglePlatform(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Jungle/junglePlatform.png"))
+        public DesertCastleTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Castle/sandcastle.png"))
         {
-            _editorName = "Jungle Platform";
-            physicsMaterial = PhysicsMaterial.Wood;
-            verticalWidth = 10f;
-            verticalWidthThick = 12f;
-            horizontalHeight = 14f;
-        }
-    }
-
-    [EditorGroup("ADGM|Tiles|Jungle")]
-    public class JungleTree : AutoPlatform
-    {
-        public JungleTree(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Jungle/jungleTree.png"))
-        {
-            _editorName = "Jungle Tree";
-            physicsMaterial = PhysicsMaterial.Wood;
-            verticalWidth = 10f;
-            verticalWidthThick = 12f;
-            horizontalHeight = 14f;
-        }
-    }
-    [EditorGroup("ADGM|Tiles|Jungle")]
-    public class JungleTileset : AutoBlock
-    {
-        public JungleTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Jungle/jungleTileset.png"))
-        {
-            _editorName = "Jungle";
+            _editorName = "Sand Castle";
             physicsMaterial = PhysicsMaterial.Metal;
             verticalWidth = 10f;
             verticalWidthThick = 15f;
             horizontalHeight = 14f;
         }
     }
-    [EditorGroup("ADGM|Tiles|Jungle")]
-    public class BackgroundJungle : BackgroundTile
+    [EditorGroup("ADGM|Tiles|Castle")]
+    public class BackgroundCastle : BackgroundTile
     {
-        public BackgroundJungle(float xpos, float ypos) : base(xpos, ypos)
+        public BackgroundCastle(float xpos, float ypos) : base(xpos, ypos)
         {
-            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Jungle/jungleBackground.png"), 16, 16, true);
+            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Castle/castlePlus_background.png"), 16, 16, true);
             _opacityFromGraphic = true;
             center = new Vec2(8f, 8f);
             collisionSize = new Vec2(16f, 16f);
             collisionOffset = new Vec2(-8f, -8f);
-            _editorName = "BG Jungle";
+            _editorName = "BG Castle";
         }
     }
-    [EditorGroup("ADGM|Tiles|Jungle")]
-    public class JungleParallax : BackgroundUpdater
+    [EditorGroup("ADGM|Tiles|Castle")]
+    public class CastleParallax : BackgroundUpdater
     {
         int animation;
         int animationFrame;
 
-        public JungleParallax(float xpos, float ypos) : base(xpos, ypos)
+        int animationType;
+        float thunderChance = 0.15f;
+
+        public CastleParallax(float xpos, float ypos) : base(xpos, ypos)
         {
-            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Jungle/jungleicon.png"), 16, 16, false);
+            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Castle/castleicon.png"), 16, 16, false);
             center = new Vec2(8f, 8f);
             _collisionSize = new Vec2(16f, 16f);
             _collisionOffset = new Vec2(-8f, -8f);
             depth = 0.9f;
             layer = Layer.Foreground;
             _visibleInGame = false;
-            _editorName = "Parallax Jungle";
+            _editorName = "Parallax Castle";
         }
         public override void Initialize()
         {
@@ -77,10 +55,10 @@ namespace DuckGame.C44P
             {
                 return;
             }
-            backgroundColor = new Color(88, 185, 255);
+            backgroundColor = new Color(0, 0, 32);
             Level.current.backgroundColor = backgroundColor;
 
-            AddParallax("Sprites/Tilesets/Jungle/jungleParallaxV2_1.png", 0.4f);
+            AddParallax("Sprites/Tilesets/Castle/castleParallax_1.png", 0.4f);
         }
 
         void AddParallax(string path, float speed)
@@ -90,7 +68,7 @@ namespace DuckGame.C44P
             Vec2 prevPosition = new Vec2();
 
             ParallaxBackground.Definition definition = null;
-            
+
             float prevX = 0;
 
             if (_parallax != null && Level.current.things.Contains(_parallax))
@@ -178,7 +156,7 @@ namespace DuckGame.C44P
 
             if (_parallax != null && Level.current.things.Contains(_parallax))
             {
-                if(definition != null)
+                if (definition != null)
                 {
                     _parallax.definition = definition;
                 }
@@ -209,14 +187,48 @@ namespace DuckGame.C44P
             {
                 animationFrame++;
                 animationFrame = animationFrame % 4;
-                string pathStart = "Sprites/Tilesets/Jungle/jungleParallaxV2_";
-                string pathMid = Convert.ToString(animationFrame + 1);
+
+                string pathStart = "Sprites/Tilesets/Castle/castleParallax_";
                 string pathEnd = ".png";
+
+                if (animationFrame == 0)
+                {
+                    if(animationType > 0)
+                    {
+                        animationType = 0;
+                    }
+                    else
+                    {
+                        if(Rando.Float(1) < thunderChance)
+                        {
+                            if(Rando.Int(0, 1) == 1)
+                            {
+                                animationType = 1;
+                            }
+                            else
+                            {
+                                animationType = 2;
+                            }
+                        }
+                    }
+                }
+
+                if(animationType == 1)
+                {
+                    pathStart += "A";
+                }
+                if(animationType == 2)
+                {
+                    pathStart += "B";
+                }
+
+                string pathMid = Convert.ToString(animationFrame + 1);
 
                 AddParallax(pathStart + pathMid + pathEnd, 0.4f);
             }
             base.Update();
         }
+
         public override void Terminate()
         {
             Level.Remove(_parallax);

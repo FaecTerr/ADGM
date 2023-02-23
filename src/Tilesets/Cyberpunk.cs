@@ -32,7 +32,7 @@
             _editorName = "Cyber block";
             physicsMaterial = PhysicsMaterial.Metal;
             verticalWidth = 10f;
-            verticalWidthThick = 12f;
+            verticalWidthThick = 15f;
             horizontalHeight = 14f;
         }
     }
@@ -46,7 +46,7 @@
             center = new Vec2(8f, 8f);
             collisionSize = new Vec2(16f, 16f);
             collisionOffset = new Vec2(-8f, -8f);
-            _editorName = "Neon lights";
+            _editorName = "CP Lights";
         }
     }
     [EditorGroup("ADGM|Tiles|Cyberduck 2084")]
@@ -62,12 +62,12 @@
             _editorName = "Cyber background";
         }
     }
-    [EditorGroup("ADGM|Tiles|Sand")]
+    [EditorGroup("ADGM|Tiles|Cyberduck 2084")]
     public class CyberParallax : BackgroundUpdater
     {
         public CyberParallax(float xpos, float ypos) : base(xpos, ypos)
         {
-            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Cyberpunk/cyberduck_2084_parallax.png"), 16, 16, false);
+            graphic = new SpriteMap(Mod.GetPath<C44P>("Sprites/Tilesets/Cyberpunk/cyberduckicon.png"), 16, 16, false);
             center = new Vec2(8f, 8f);
             _collisionSize = new Vec2(16f, 16f);
             _collisionOffset = new Vec2(-8f, -8f);
@@ -82,18 +82,18 @@
             {
                 return;
             }
-            backgroundColor = new Color(74, 74, 74);
+            backgroundColor = new Color(0, 0, 0);
             Level.current.backgroundColor = backgroundColor;
             _parallax = new ParallaxBackground(Mod.GetPath<C44P>("Sprites/Tilesets/Cyberpunk/cyberduck_2084_parallax.png"), 0f, 0f, 3);
             float speed = 0.4f;
-            _parallax.AddZone(0, 0f, speed, false, true);
-            _parallax.AddZone(1, 0f, speed, false, true);
-            _parallax.AddZone(2, 0f, speed, false, true);
-            _parallax.AddZone(3, 0f, speed, false, true);
-            _parallax.AddZone(4, 0f, speed, false, true);
-            _parallax.AddZone(5, 0f, speed, false, true);
-            _parallax.AddZone(6, 0f, speed, false, true);
-            _parallax.AddZone(7, 0f, speed, false, true);
+            _parallax.AddZone(0, 0.3f, speed, false, true);
+            _parallax.AddZone(1, 0.3f, speed, false, true);
+            _parallax.AddZone(2, 0.3f, speed, false, true);
+            _parallax.AddZone(3, 0.3f, speed, false, true);
+            _parallax.AddZone(4, 0.3f, speed, false, true);
+            _parallax.AddZone(5, 0.3f, speed, false, true);
+            _parallax.AddZone(6, -2.4f, speed, true, true);
+            _parallax.AddZone(7, -2.4f, speed, true, true);
             _parallax.AddZone(8, 0f, speed, false, true);
             _parallax.AddZone(9, 0f, speed, false, true);
             _parallax.AddZone(10, 0f, speed, false, true);

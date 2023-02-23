@@ -81,6 +81,7 @@
     <Compile Include="src\Gamemods\Collect GM\CollectingUI.cs" />
     <Compile Include="src\Gamemods\CP GM\ContestZone.cs" />
     <Compile Include="src\Gamemods\ForceTag.cs" />
+    <Compile Include="src\Tilesets\Castle.cs" />
     <Compile Include="src\Tilesets\ColoredBricks.cs" />
     <Compile Include="src\Tilesets\Cyberpunk.cs" />
     <Compile Include="src\Tilesets\Desert.cs" />

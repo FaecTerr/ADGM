@@ -89,7 +89,7 @@ namespace DuckGame.C44P
                     {
                         id = "normalmaps",
                         name = "@NORMALICON@|DGBLUE|Normal Levels",
-                        value = 90,
+                        value = 0,
                         suffix = "%",
                         min = 0,
                         max = 100,
@@ -105,7 +105,7 @@ namespace DuckGame.C44P
                     {
                         id = "randommaps",
                         name = "@RANDOMICON@|DGBLUE|Random Levels",
-                        value = 10,
+                        value = 0,
                         suffix = "%",
                         min = 0,
                         max = 100,
@@ -121,7 +121,7 @@ namespace DuckGame.C44P
                     {
                         id = "custommaps",
                         name = "@CUSTOMICON@|DGBLUE|Custom Levels",
-                        value = 0,
+                        value = 100,
                         suffix = "%",
                         min = 0,
                         max = 100,
@@ -575,7 +575,7 @@ namespace DuckGame.C44P
                                         {
                                             hasCPGM = true;
                                         }
-                                        if (typeString.Contains("DuckGame.C44P.GM_CollectionF"))
+                                        if (typeString.Contains("DuckGame.C44P.GM_Collection"))
                                         {
                                             hasCGM = true;
                                         }
@@ -657,7 +657,7 @@ namespace DuckGame.C44P
                         removedLevelsFuse.Clear();
                     }
 
-                    C44P.AddLevels("Fuse");
+                    C44P.AddLevels("Fuse/");
 
                     foreach (string t in CTFLevels)
                     {
@@ -687,7 +687,7 @@ namespace DuckGame.C44P
                         removedLevelsCTF.Clear();
                     }
 
-                    C44P.AddLevels("CTF");
+                    C44P.AddLevels("CTF/");
 
                     foreach (string t in FuseLevels)
                     {
@@ -747,7 +747,7 @@ namespace DuckGame.C44P
                         removedLevelsC.Clear();
                     }
 
-                    C44P.AddLevels("C");
+                    C44P.AddLevels("C/");
 
                     foreach (string t in FuseLevels)
                     {
@@ -777,7 +777,7 @@ namespace DuckGame.C44P
                         removedLevelsTheft.Clear();
                     }
 
-                    C44P.AddLevels("Theft");
+                    C44P.AddLevels("Theft/");
 
                     foreach (string t in FuseLevels)
                     {
