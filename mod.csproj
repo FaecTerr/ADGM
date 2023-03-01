@@ -81,6 +81,7 @@
     <Compile Include="src\Gamemods\Collect GM\CollectingUI.cs" />
     <Compile Include="src\Gamemods\CP GM\ContestZone.cs" />
     <Compile Include="src\Gamemods\ForceTag.cs" />
+    <Compile Include="src\Gamemods\TemporaryInvincibility.cs" />
     <Compile Include="src\Tilesets\Castle.cs" />
     <Compile Include="src\Tilesets\ColoredBricks.cs" />
     <Compile Include="src\Tilesets\Cyberpunk.cs" />
@@ -106,7 +107,7 @@
     <Compile Include="src\Gamemods\ProgressBarType.cs" />
     <Compile Include="src\Gamemods\CTF GM\TeamCounter.cs" />
     <Compile Include="src\Gamemods\CTF GM\Safezone.cs" />
-    <Compile Include="src\Gamemods\Respawner.cs" />
+    <Compile Include="src\Gamemods\TeamRespawner.cs" />
     <Compile Include="src\Main\HarmonyPathces.cs" />
     <Compile Include="src\NetMessages\NMDuckRespawn.cs" />
     <Compile Include="src\TeamsSet\ModTeams.cs" />

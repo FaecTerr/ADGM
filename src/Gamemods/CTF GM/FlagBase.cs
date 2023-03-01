@@ -19,8 +19,10 @@ namespace DuckGame.C44P
         private bool init;
         public bool getPoint = false;
         public int Team;
+        public int replacedFrame = -1;
 
         public EditorProperty<int> team; 
+
         public bool flagOnBase
         {
             get
@@ -48,16 +50,19 @@ namespace DuckGame.C44P
 
         public void ReassignTeam(Team t)
         {
-            if(t != null && Teams.all.Contains(dgTeam) && t != dgTeam)
+            if(t != null)
             {
                 init = true;
 
                 dgTeam = t;
-                _flag.dgTeam = t;
+                Team = Teams.IndexOf(t);
 
-                Team = Teams.active.IndexOf(t);
-                _flag.Team = Team;
-                _flag.init = true;
+                if (_flag != null)
+                {
+                    _flag.dgTeam = t;
+                    _flag.Team = Team;
+                    _flag.init = true;
+                }
             }
         }
 
@@ -76,7 +81,7 @@ namespace DuckGame.C44P
                 Level.Add(_flag);
             }
 
-            if (dgTeam == null && Level.current.things[typeof(Duck)].Count() > 1)
+            if (dgTeam == null && Level.current.things[typeof(Duck)].Count() > 1 && Level.current.things[typeof(ForceTag)].Count() == 0)
             {
                 if (Level.Nearest<Duck>(position).team != null)
                 {
@@ -92,8 +97,10 @@ namespace DuckGame.C44P
 
             if (_flag != null)
             {
+                _flag.replacedFrame = replacedFrame;
                 _flag.Team = Team;
                 _flag.based = true;
+                _flag.dgTeam = dgTeam;
                 if (_flag.delivered)
                 {
                     _flag.delivered = false;
@@ -125,6 +132,14 @@ namespace DuckGame.C44P
                         _flag.OnBase = false;
                     }
                 }
+            }
+        }
+        public override void Draw()
+        {
+            base.Draw();
+            if (dgTeam != null)
+            {
+                //Graphics.DrawString(dgTeam.currentDisplayName, position, Color.White);
             }
         }
     }

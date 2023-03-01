@@ -22,6 +22,8 @@ namespace DuckGame.C44P
         
         public EditorProperty<int> team;
 
+        public int replacedFrame = -1;
+
         bool ableToInteract;
         float keyVisibility;
 
@@ -64,7 +66,15 @@ namespace DuckGame.C44P
             }*/
 
             _sprite.flipH = flag.scale.x < 0;
-            flag.frame = Team;
+
+            if (replacedFrame < 0)
+            {
+                flag.frame = Team;
+            }
+            else
+            {
+                flag.frame = replacedFrame;
+            }
 
             ableToInteract = false;
 

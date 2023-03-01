@@ -202,16 +202,20 @@
             winnerDefined = true;
             Profile[] winners = new Profile[t.activeProfiles.Count];
 
+            foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+            {
+                Level.Remove(tag);
+            }
+            foreach (TeamRespawner respawner in Level.current.things[typeof(TeamRespawner)])
+            {
+                Level.Remove(respawner);
+            }
             foreach (Duck d in Level.current.things[typeof(Duck)])
             {
                 if ((t == null || (t != null && !t.activeProfiles.Contains(d.profile))) && !d.dead)
                 {
                     //d.Kill(new DTImpact(this));
                 }
-            }
-            foreach (TeamRespawner respawner in Level.current.things[typeof(TeamRespawner)])
-            {
-                Level.Remove(respawner);
             }
         }
         public void TerroristWin()

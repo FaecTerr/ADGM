@@ -81,9 +81,8 @@ namespace DuckGame.C44P
                 Upstairs up = Level.CheckLine<Upstairs>(position + dir * 6f, position + dir * 16000f, this);
                 if (up != null)
                 {
-
                     Graphics.DrawLine(position, up.position, Color.MediumPurple * 0.5f, 2f);
-                    Vec2 point = position + (up.position - position) * DateTime.Now.Millisecond / 1000;
+                    Vec2 point = position + (up.position - position) * DateTime.Now.Millisecond * 0.001f;
                     Graphics.DrawRect(point - new Vec2(2, 2), point + new Vec2(2, 2), Color.OrangeRed * 0.5f);
                 }
             }

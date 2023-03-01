@@ -6,8 +6,8 @@ namespace DuckGame.C44P
     [BaggedProperty("isFatal", false)]
     public class FireGrenade : BaseGrenade
     {
-        private int charges = 16;
-        private float volume = 2f; 
+        private int charges = 1;
+        private float volume = 0.4f; 
         private float Time;
         public FireGrenade(float xval, float yval) : base(xval, yval)
         {

@@ -123,7 +123,8 @@ namespace DuckGame.C44P
 				Duck nearestTarget = null;
                 foreach (Duck d in Level.current.things[typeof(Duck)])
                 {
-					if((d.position.x > barrelPosition.x && offDir > 0 || d.position.x < barrelPosition.x && offDir < 0) && Level.CheckLine<Block>(d.position, barrelPosition) == null)
+					if((d.position.x > barrelPosition.x && offDir > 0 || d.position.x < barrelPosition.x && offDir < 0) 
+						&& Level.CheckLine<Block>(d.position, barrelPosition) == null && Level.CheckLine<Safezone>(d.position, barrelPosition) == null)
                     {
 						if(nearestTarget == null)
                         {

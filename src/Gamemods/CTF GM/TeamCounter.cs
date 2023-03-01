@@ -45,11 +45,21 @@
                         drawPosition.y += (sameAmount[(int)count[i]]) * (flag.texture.height * 0.125f) * Unit.y * 0.25f;
 
                         flag.frame = team[i];
+                        foreach (Flag f in Level.current.things[typeof(Flag)])
+                        {
+                            if(f.Team == i && f.replacedFrame >= 0)
+                            {
+                                flag.frame = f.replacedFrame;
+                            }
+                        }
+
                         Vec2 flagScale = flag.scale;
+                        flag.depth = 0.91f;
                         Graphics.Draw(flag, drawPosition.x, drawPosition.y);
 
                         flag.color = Color.Black;
                         flag.scale *= 1.1f;
+                        flag.depth = 0.9f;
                         Graphics.Draw(flag, drawPosition.x, drawPosition.y);
 
                         flag.color = Color.White;

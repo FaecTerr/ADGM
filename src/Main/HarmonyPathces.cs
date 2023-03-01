@@ -31,7 +31,7 @@ namespace DuckGame.C44P
 					FieldInfo field = typeof(UIText).GetField("_text", BindingFlags.Instance | BindingFlags.NonPublic);
 					if (num == 0)
 					{
-						if (text.text == "Required Kills" || text.text == " Required Points")
+						/*if (text.text == "Required Kills" || text.text == " Required Points")
 						{
 							field.SetValue(__instance, "Required Wins");
 						}
@@ -58,11 +58,11 @@ namespace DuckGame.C44P
 						if (text.text == "@RAINBOWICON@|GRAY|Internet Levels")
 						{
 							field.SetValue(__instance, "@RAINBOWICON@|DGBLUE|Internet Levels");
-						}
+						}*/
 					}
 					else
 					{
-						if (text.text == "Wall Mode")
+						/*if (text.text == "Wall Mode")
 						{
 							field.SetValue(__instance, "|GRAY|Wall Mode");
 						}
@@ -81,179 +81,60 @@ namespace DuckGame.C44P
 						if (text.text == "@RAINBOWICON@|DGBLUE|Internet Levels")
 						{
 							field.SetValue(__instance, "@RAINBOWICON@|GRAY|Internet Levels");
-						}
+						}*/
 					}
-					if (num == 1)
+					if (num == 1) //Fuse
 					{
-						if (text.text == "Required Wins" || text.text == " Required Points")
+						/*if (text.text == "Required Wins" || text.text == " Required Points")
 						{
 							text.text = "Required Kills";
 						}
 						if (text.text == "Rests Every" || text.text == "Initial Points")
 						{
 							field.SetValue(__instance, "|GRAY|Rests Every");
-						}
+						}*/
 					}
-					else if (num == 2)
+					else if (num == 2) //CTF
 					{
-						if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Seconds")
+						/*if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Seconds")
 						{
 							text.text = " Required Points";
 						}
 						if (text.text == "Rests Every" || text.text == "|GRAY|Rests Every")
 						{
 							field.SetValue(__instance, "Initial Points");
-						}
+						}*/
 					}
-					else if (num == 3)
+					else if (num == 3) //CP
 					{
-						if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Points" || text.text == " Required Levels")
+						/*if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Points" || text.text == " Required Levels")
 						{
 							field.SetValue(__instance, " Required Seconds");
 						}
 						if (text.text == "Rests Every" || text.text == "Initial Points")
 						{
 							field.SetValue(__instance, "|GRAY|Rests Every");
-						}
+						}*/
 					}
-					else if (num == 4)
+					else if (num == 4) //C
 					{
-						if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Points" || text.text == " Required Seconds")
+						/*if (text.text == "Required Wins" || text.text == "Required Kills" || text.text == " Required Points" || text.text == " Required Seconds")
 						{
 							field.SetValue(__instance, " Required Levels");
 						}
 						if (text.text == "Rests Every" || text.text == "Initial Points")
 						{
 							field.SetValue(__instance, "|GRAY|Rests Every");
-						}
+						}*/
 					}
 				}
 			}
 		}
 
-		//Duck.Kill - for creating a respawn trail of duck and more
+		//Duck.Kill 
 		public static void DuckKill_Prefix(Duck duck, DestroyType type = null)
 		{
-			List<Thing> list = Level.current.things[typeof(TeamRespawner)].ToList();
-
-			if (duck.invincible)
-			{
-				if (!(type is DTImpale) && duck._trapped == null)
-				{
-					return;
-				}
-				else
-				{
-					duck.killingNet = false;
-					duck.invincible = false;
-				}
-			}
-			/*if ((int)TeamSelect2.GetMatchSetting("gamemode").value == 2 && duck.profile != null && __instance.profile.localPlayer && points != null)
-			{
-				bool flag = false;
-				foreach (DuckPoints p in Level.current.things[typeof(DuckPoints)])
-				{
-					if (p.points >= (int)DuckNetwork.core.matchSettings[0].value)
-					{
-						flag = true;
-					}
-				}
-				if (!duck.dead && !flag)
-				{
-					points.DeductPoint(false);
-					if (DuckNetwork.localConnection != points.connection)
-					{
-						Send.Message(new NMDeductPoint(points.duck), points.connection);
-					}
-				}
-			}*/
-
-			/*if ((int)TeamSelect2.GetMatchSetting("gamemode").value == 3 && duck.profile != null && duck.profile.localPlayer && points != null)
-			{
-				points.wasDead = true;
-			}*/
-
-			if (list.Count > 0)
-			{
-				TeamHat hat = (TeamHat)duck.GetEquipment(typeof(TeamHat));
-				if (hat != null)
-				{
-					Level.Remove(hat);
-				}
-			}
-			if (list.Count > 0 && duck.profile != null && duck.profile.localPlayer)
-			{
-				if (duck.ragdoll != null)
-				{
-					duck.ragdoll.tongueStuck = Vec2.Zero;
-					duck.ragdoll.tongueStuckThing = null;
-				}
-				if (duck._ragdollInstance != null)
-				{
-					duck._ragdollInstance.tongueStuck = Vec2.Zero;
-					duck._ragdollInstance.tongueStuckThing = null;
-				}
-				List<Type> equippers = new List<Type>();
-				foreach (Thing thing in Level.current.things[typeof(Equipper)])
-				{
-					Equipper e = (Equipper)thing;
-					Thing t = e.GetContainedInstance(duck.position);
-					if (t != null && t is Equipment && !(t is Holster))
-					{
-						equippers.Add(t.GetType());
-					}
-				}
-				List<Equipment> equipment = new List<Equipment>();
-				foreach (Equipment e in duck._equipment)
-				{
-					foreach (Type t in equippers)
-					{
-						if (e.GetType() == t)
-						{
-							equipment.Add(e);
-						}
-					}
-				}
-
-				if (duck._cooked != null)
-					return;
-
-				TeamRespawner nextSpawn = TeamRespawner.GetRespawner(duck);
-
-				if (nextSpawn != null)
-				{
-					Vec2 position = nextSpawn.position;
-					DuckNetwork.SendToEveryone(new NMDuckRespawn(duck, false));
-					duck.Ressurect();
-					if (Network.isActive)
-					{
-						if (duck._ragdollInstance != null && duck._ragdollInstance._part1 != null && duck._ragdollInstance._part2 != null && duck._ragdollInstance._part3 != null)
-						{
-							duck._ragdollInstance._part1.material = duck.material;
-							duck._ragdollInstance._part2.material = duck.material;
-							duck._ragdollInstance._part3.material = duck.material;
-						}
-					}
-					else
-					{
-						if (duck.ragdoll != null && duck.ragdoll._part1 != null && duck.ragdoll._part2 != null && duck.ragdoll._part3 != null)
-						{
-							duck.ragdoll._part1.material = duck.material;
-							duck.ragdoll._part2.material = duck.material;
-							duck.ragdoll._part3.material = duck.material;
-						}
-					}
-					if (duck.inNet)
-					{
-						duck.invincible = false;
-					}
-					duck.invincible = false; 
-					if (duck.profile != null && duck.profile.localPlayer)
-					{
-						Thing.Fondle(duck, DuckNetwork.localConnection);
-					}
-				}
-			}
+			
 		}
 
 		//RagdollPart.OnDestroy - fixes a bug when ragdoll creates 2 CookedDucks
@@ -269,28 +150,6 @@ namespace DuckGame.C44P
 			}
 			return true;
 		}
-
-		//Level.AddThing
-		/*public static bool LevelAddThing_Prefix(Level __instance, Thing t)
-		{
-			if (__instance.things[typeof(Respawns)].Count() > 0)
-			{
-				if (t.GetType().Assembly.GetName().Name == "UFFMod")
-				{
-					if (t.GetType().Name == "FreezeRay" || t.GetType().Name == "HandOfMidas") // they break respawns
-					{
-						__instance.AddThing(new CaseRUDE(t.x, t.y));
-						return false;
-					}
-				}
-				if (t is GoodBook)
-				{
-					__instance.AddThing(new CaseRUDE(t.x, t.y));
-					return false;
-				}
-			}
-			return true;
-		}*/
 
 		//DuckNetwork.CreateMatchSettingsInfoWindow
 		public static void DuckNetworkCreateMatchSettingsInfoWindow_Postfix(ref UIMenu __result, UIMenu openOnClose = null)
