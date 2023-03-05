@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DuckGame;
 
 namespace DuckGame.C44P
 {
@@ -12,7 +9,7 @@ namespace DuckGame.C44P
     {
         private SpriteMap _sprite; 
         public GMTimer _timer;
-        private TeamCounter teamCounter;
+        private TeamCounter teamCounter = null;
 
         public bool Activate = false;
         public bool winnerDefined;
@@ -22,8 +19,10 @@ namespace DuckGame.C44P
 
         public EditorProperty<float> maxPoints;
         public EditorProperty<float> RoundTime;
-        public EditorProperty<bool> Revive;
 
+        Sprite off = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusOFF.png"));
+        Sprite on = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusON.png"));
+        Sprite warn = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusWARN.png"));
         public GM_CTF(float xval, float yval) : base(xval, yval)
         {
             _sprite = new SpriteMap(GetPath("Sprites/Gamemods/GameMode.png"), 16, 16, false);
@@ -36,10 +35,14 @@ namespace DuckGame.C44P
 
             maxPoints = new EditorProperty<float>(3, this, 1f, 8f, 1f, null, false, false) { name = "Goal points"};
             RoundTime = new EditorProperty<float>(90f, this, 30f, 180f, 1f, null, false, false);
-            Revive = new EditorProperty<bool>(true);
 
             _editorName = "GM CTF";
             editorTooltip = "Doesn't need in-mod equipment, team registering happens automatically";
+            maxPlaceable = 1;
+
+            off.CenterOrigin();
+            on.CenterOrigin();
+            warn.CenterOrigin();
         }
 
         public override void Update()
@@ -63,20 +66,34 @@ namespace DuckGame.C44P
                     _timer.Resume();
                 }
 
-                if (_timer != null)
+                if (_timer != null && teamCounter == null)
                 {
-                    TeamCounter counter = new TeamCounter(position.x, position.y - 16f, false)
+                    teamCounter = new TeamCounter(position.x, position.y - 16f, false)
                     {
                         anchor = this,
                         depth = 0.95f,
                         Timer = _timer
                     };
-                    teamCounter = counter;
                     for (int i = 0; i < Teams.active.Count; i++)
                     {
-                        counter.team[i] = i;
+                        teamCounter.team[i] = i;
                     }
-                    Level.Add(counter);
+                    Level.Add(teamCounter);
+                }
+            }
+
+            if (Level.current.things[typeof(TeamCounter)].Count() > 1)
+            {
+                foreach (TeamCounter counter in Level.current.things[typeof(TeamCounter)])
+                {
+                    if(teamCounter == null)
+                    {
+                        teamCounter = counter;
+                    }
+                    if (counter != teamCounter)
+                    {
+                        Level.Remove(counter);
+                    }
                 }
             }
 
@@ -161,6 +178,148 @@ namespace DuckGame.C44P
                 if((t == null || (t != null && !t.activeProfiles.Contains(d.profile))) && !d.dead)
                 {
                     d.Kill(new DTImpact(this));
+                }
+            }
+        }
+        public override void Draw()
+        {
+            base.Draw();
+            if (Level.current is Editor)
+            {
+                int row = 0;
+                int yoffset = 16;
+                int spriteYOffset = 4;
+                int xoffset = 14;
+                int yMove = 10;
+
+                string text = "";
+
+                float unit = Level.current.camera.size.x / 320 * 0.4f;
+
+                off.scale = new Vec2(unit, unit) * 0.5f;
+                on.scale = off.scale;
+                warn.scale = off.scale;
+
+                int[] teams = new int[8];
+                int taggedTeams = 0; 
+                int respawnTags = 0;
+                foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+                {
+                    if (tag.responsibleForRespawn)
+                    {
+                        respawnTags++;
+                    }
+                    teams[tag.tagID.value]++;
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if(teams[i] > 0)
+                    {
+                        taggedTeams++;
+                    }
+                }
+                int maxTeamsTarget = Math.Max(Level.current.things[typeof(FlagBase)].Count(), Math.Max(Level.current.things[typeof(TeamSpawn)].Count(), taggedTeams));
+
+                text = "Flag Base placed";
+                Graphics.DrawString(text + " (" + Level.current.things[typeof(FlagBase)].Count() + " / " + maxTeamsTarget + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (Level.current.things[typeof(FlagBase)].Count() > 0)
+                {
+                    if (Level.current.things[typeof(FlagBase)].Count() < maxTeamsTarget)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Team spawns placed";
+                Graphics.DrawString(text + " (" + Level.current.things[typeof(TeamSpawn)].Count() + " / " + maxTeamsTarget + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (Level.current.things[typeof(TeamSpawn)].Count() > 0)
+                {
+                    if (Level.current.things[typeof(TeamSpawn)].Count() < maxTeamsTarget)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Force tags placed";
+                Graphics.DrawString(text + " (" + taggedTeams + " / " + maxTeamsTarget + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (taggedTeams > 0)
+                {
+                    if (taggedTeams < maxTeamsTarget || taggedTeams > maxTeamsTarget)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                bool respawners = Level.current.things[typeof(TeamRespawner)].Count() > 0;
+
+                if (respawners)
+                {
+                    if (respawnTags < Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Not enough ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    if (respawnTags > Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Too many ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                if(respawnTags > Level.current.things[typeof(TeamRespawner)].Count())
+                {
+
+                    row++;
+                    text = "Not enough respawners";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                if (maxTeamsTarget > 8)
+                {
+                    row++;
+                    text = "Too many teams planned (Team respawns/Flag Bases)";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                if (maxTeamsTarget < 2)
+                {
+                    row++;
+                    text = "Not enough teams planned (Team respawns/Flag Bases/Tag IDs)";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
                 }
             }
         }

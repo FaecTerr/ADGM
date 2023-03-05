@@ -15,12 +15,14 @@ namespace DuckGame.C44P
         //I am still not sure if I do need this thing right now, but it definetly nice to have, cause makes things bit accurate and nice, instead of workarounds
         //Some of workarounds done, so maybe they are not that cool, you might think. But if I had whole time of the world, I would definetly done this whole mod differently
         public EditorProperty<int> tagID = new EditorProperty<int>(0, null, 0, 7, 1) { _tooltip = "This tool is to help gamemode hold teams up without equipment. \nDefault: 0 - Defending (CTE), 1 - Attacking (TE). CTF and CP doesn't \nnecessarily require any tagging and maintain them on their own."};
-        public EditorProperty<bool> responsibleForRespawn = new EditorProperty<bool>(false); 
+        public EditorProperty<bool> responsibleForRespawn = new EditorProperty<bool>(false) { name = "Respawn", _tooltip = "Marks that tagID team to be able to respawn. Only one required per tagID."}; 
         public EditorProperty<bool> Trigger = new EditorProperty<bool>(false);
+        public EditorProperty<int> TriggerID = new EditorProperty<int>(0, null, 0, 9, 1);
 
         public List<Team> team = new List<Team>();
 
         public bool initialized;
+        public bool triggered;
 
         Color[] colors = new Color[] { Color.LightBlue, Color.Red, Color.Purple, Color.OrangeRed, Color.DarkGreen, Color.YellowGreen, Color.Lime, Color.Magenta};
         SpriteMap sprite = new SpriteMap(GetPath<C44P>("Sprites/Gamemods/Tag.png"), 16, 16); 
@@ -63,6 +65,14 @@ namespace DuckGame.C44P
             }
         }
 
+        public void OnTrigger()
+        {
+            foreach (TeamRespawner respawner in Level.CheckCircleAll<TeamRespawner>(position, range))
+            {
+                respawner.accesible = !respawner.accesible;
+            }
+        }
+
         public override void Update()
         {
             base.Update();
@@ -93,6 +103,17 @@ namespace DuckGame.C44P
                 else
                 {
                     initialized = true;
+                }
+            }
+            if (Trigger && triggered)
+            {
+                triggered = false;
+                foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+                {
+                    if (tag.tagID.value == tagID.value && tag.TriggerID.value == TriggerID.value && tag.Trigger)
+                    {
+                        tag.OnTrigger();
+                    }
                 }
             }
             if (responsibleForRespawn)
@@ -180,6 +201,13 @@ namespace DuckGame.C44P
                                                     Fondle(d._ragdollInstance);
                                                 }
                                             }
+                                            foreach(Hat h in Level.current.things[typeof(Hat)])
+                                            {
+                                                if(h.prevOwner != null && h.prevOwner is Duck && (h.prevOwner as Duck) == d)
+                                                {
+                                                    d.Equip(h);
+                                                }
+                                            }
                                             if (d._cookedInstance != null && d._cookedInstance.visible)
                                             {
                                                 d._cookedInstance.visible = false;
@@ -204,10 +232,11 @@ namespace DuckGame.C44P
         {
             frame = tagID;
 
-            if(Level.current is Editor)
+            if (Level.current is Editor)
             {
                 alpha = 1;
-                Graphics.DrawCircle(position, range, colors[tagID]);
+
+                Graphics.DrawCircle(position, range, colors[tagID] * 0.4f);
 
                 int num = 0;
                 if (responsibleForRespawn)
@@ -228,7 +257,7 @@ namespace DuckGame.C44P
                 }
 
                 bool isParent = false;
-                if(Level.CheckCircle<SpawnPoint>(position, range) != null)
+                if (Level.CheckCircle<SpawnPoint>(position, range) != null)
                 {
                     isParent = true;
                     float angle = DateTime.Now.Millisecond * 0.36f * 3.14157f / 180;
@@ -236,44 +265,69 @@ namespace DuckGame.C44P
                     Graphics.DrawRect(position + spinningPos - new Vec2(1, 1), position + spinningPos + new Vec2(1, 1), colors[tagID]);
                     Graphics.DrawRect(position - spinningPos - new Vec2(1, 1), position - spinningPos + new Vec2(1, 1), colors[tagID]);
                 }
-
-                foreach (SpawnPoint spawn in Level.CheckCircleAll<SpawnPoint>(position, range))
-                {
-                    Graphics.DrawLine(position, spawn.position, colors[tagID], 1.5f);
-                    Vec2 offsetPosition = new Vec2(spawn.position - position) * (1 - DateTime.Now.Millisecond * 0.001f);
-                    Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
-                }
-                foreach (FlagBase flagBase in Level.CheckCircleAll<FlagBase>(position, range))
-                {
-                    Graphics.DrawLine(position, flagBase.position, colors[tagID], 1.5f);
-                    Vec2 offsetPosition = new Vec2(flagBase.position - position) * DateTime.Now.Millisecond * 0.001f;
-                    Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
-                }
-                foreach (TeamRespawner respawner in Level.CheckCircleAll<TeamRespawner>(position, range))
-                {
-                    Graphics.DrawLine(position, respawner.position, colors[tagID], 1.5f);
-                    Vec2 offsetPosition = new Vec2(respawner.position - position) * DateTime.Now.Millisecond * 0.001f;
-                    Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
-                }
-                if (Trigger)
-                {
-                    foreach (ContestSafe safe in Level.CheckCircleAll<ContestSafe>(position, range))
-                    {
-                        Graphics.DrawLine(position, safe.position, colors[tagID], 1.5f);
-                        Vec2 offsetPosition = new Vec2(safe.position - position) * (1 - DateTime.Now.Millisecond * 0.001f);
-                        Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
-                    }
-                }
-
+                
                 if (isParent)
                 {
                     foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
                     {
-                        if(tag.tagID.value == tagID.value)
+                        if (tag.tagID.value == tagID.value)
                         {
-                            Graphics.DrawLine(position, tag.position, colors[tagID], 1.5f);
+                            Graphics.DrawLine(position, tag.position, colors[tagID] * 0.3f, 1f);
+                            Vec2 offsetPosition = new Vec2(tag.position - position) * DateTime.Now.Millisecond * 0.001f;
+                            Graphics.DrawRect(position + offsetPosition - new Vec2(1f, 1), position + offsetPosition + new Vec2(1, 1), colors[tagID]);
+                        }
+                    }
+                }
+                if (Trigger)
+                {
+                    foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+                    {
+                        if (tag.Trigger && tag.TriggerID.value == TriggerID.value && tag.tagID.value == tagID.value)
+                        {
+                            Graphics.DrawLine(position, tag.position, colors[tagID] * 0.3f, 1.75f);
                             Vec2 offsetPosition = new Vec2(tag.position - position) * DateTime.Now.Millisecond * 0.001f;
                             Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
+                        }
+                    }
+                }
+
+                if (Mouse.positionScreen.x < position.x + 8 && Mouse.positionScreen.x > position.x - 8 && Mouse.positionScreen.y < position.y + 8 && Mouse.positionScreen.y > position.y - 8)
+                {
+                    foreach (SpawnPoint spawn in Level.CheckCircleAll<SpawnPoint>(position, range))
+                    {
+                        Graphics.DrawLine(position, spawn.position, colors[tagID], 1.5f);
+                        Vec2 offsetPosition = new Vec2(spawn.position - position) * (1 - DateTime.Now.Millisecond * 0.001f);
+                        Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
+                    }
+                    foreach (FlagBase flagBase in Level.CheckCircleAll<FlagBase>(position, range))
+                    {
+                        Graphics.DrawLine(position, flagBase.position, colors[tagID], 1.5f);
+                        Vec2 offsetPosition = new Vec2(flagBase.position - position) * DateTime.Now.Millisecond * 0.001f;
+                        Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
+                    }
+                    foreach (TeamRespawner respawner in Level.CheckCircleAll<TeamRespawner>(position, range))
+                    {
+                        Graphics.DrawLine(position, respawner.position, colors[tagID], 1.5f);
+                        Vec2 offsetPosition = new Vec2(respawner.position - position) * DateTime.Now.Millisecond * 0.001f;
+                        Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
+                    }
+                    if (Trigger)
+                    {
+                        foreach (ContestSafe safe in Level.CheckCircleAll<ContestSafe>(position, range))
+                        {
+                            Graphics.DrawLine(position, safe.position, colors[tagID], 1.5f);
+                            Vec2 offsetPosition = new Vec2(safe.position - position) * (1 - DateTime.Now.Millisecond * 0.001f);
+                            Graphics.DrawRect(position + offsetPosition - new Vec2(2, 2), position + offsetPosition + new Vec2(2, 2), colors[tagID]);
+                        }
+                    }
+                    if (responsibleForRespawn)
+                    {
+                        foreach (ForceTag f in Level.current.things[typeof(ForceTag)])
+                        {
+                            if (f != this && f.responsibleForRespawn.value == true && f.tagID.value == tagID.value)
+                            {
+                                //f.responsibleForRespawn.value = false;
+                            }
                         }
                     }
                 }
@@ -284,5 +338,6 @@ namespace DuckGame.C44P
             }
             base.Draw();
         }
+
     }
 }

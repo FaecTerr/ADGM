@@ -21,6 +21,8 @@
 			loseAccuracy = 0.08f;
 			maxAccuracyLost = 0.6f;
 
+			_fireSoundPitch = 1.25f;
+
 			_holdOffset = new Vec2(0f, -1f);
 		}
 	}

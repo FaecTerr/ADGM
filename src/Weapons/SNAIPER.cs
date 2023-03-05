@@ -30,6 +30,7 @@ namespace DuckGame.C44P
 			collisionSize = new Vec2(16f, 8f);
 			_barrelOffsetTL = new Vec2(37f, 3f);
 			_fireSound = "sniper";
+			_fireSoundPitch = -0.9f;
 			_kickForce = 2f;
 			_fireRumble = RumbleIntensity.Light;
 			laserSight = true;

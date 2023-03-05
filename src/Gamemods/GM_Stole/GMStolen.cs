@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace DuckGame.C44P
 {
@@ -15,12 +16,15 @@ namespace DuckGame.C44P
 
         public EditorProperty<float> RoundTime;
         public EditorProperty<int> SafesToWin;
-        public EditorProperty<bool> Revive;
+        public EditorProperty<int> BonusTime;
 
-        public StateBinding _time = new StateBinding("time", -1, false, false);
         public StateBinding _activate = new StateBinding("Activate", -1, false, false);
         public StateBinding _ctWinBinding = new StateBinding("ctWins", -1, false, false);
         public StateBinding _tWinBinding = new StateBinding("tWins", -1, false, false);
+
+        Sprite off = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusOFF.png"));
+        Sprite on = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusON.png"));
+        Sprite warn = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusWARN.png"));
 
         public GM_STOLEN(float xval, float yval, GMTimer gmt) : base(xval, yval)
         {
@@ -33,11 +37,17 @@ namespace DuckGame.C44P
             _visibleInGame = false;
             _timer = gmt;
             layer = Layer.Foreground;
+
             RoundTime = new EditorProperty<float>(90f, this, 20f, 180f, 1f, null);
-            SafesToWin = new EditorProperty<int>(3, this, 1, 10, 1, null) { name = "Goal points"};
-            Revive = new EditorProperty<bool>(false);
+            SafesToWin = new EditorProperty<int>(3, this, 1, 10, 1, null) { name = "Goal points" };
+            BonusTime = new EditorProperty<int>(0, this, 0, 90, 5);
 
             _editorName = "GM Theft";
+            maxPlaceable = 1;
+
+            off.CenterOrigin();
+            on.CenterOrigin();
+            warn.CenterOrigin();
         }
         public override void Update()
         {
@@ -50,17 +60,7 @@ namespace DuckGame.C44P
                     contestedSafes += 1;
                 }
             }
-            foreach (Fuse_armor armor in Level.current.things[typeof(Fuse_armor)]) //after getting a hit by bullet in armor duck will instantly respawn at respawn point
-            {
-                if (Revive == true)
-                {
-                    if (armor.owner != null)
-                    {
-                        Duck d = armor.owner as Duck;
-                        d.doThrow = true;
-                    }
-                }
-            }
+
             if (_timer == null && !(Level.current is Editor))
             {
                 _timer = new GMTimer(position.x, position.y - 16f)
@@ -174,9 +174,9 @@ namespace DuckGame.C44P
                     GameMode.lastWinners.Add(profile);
                 }
             }
-            foreach (TeamRespawner respawner in Level.current.things[typeof(TeamRespawner)])
+            foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
             {
-                Level.Remove(respawner);
+                Level.Remove(tag);
             }
             foreach (TeamRespawner respawner in Level.current.things[typeof(TeamRespawner)])
             {
@@ -187,6 +187,164 @@ namespace DuckGame.C44P
                 if ((t == null || (t != null && !t.activeProfiles.Contains(d.profile))) && !d.dead)
                 {
                     //d.Kill(new DTImpact(this));
+                }
+            }
+        }
+
+        public override void Draw()
+        {
+            base.Draw();
+            if (Level.current is Editor)
+            {
+                int row = 0;
+                int yoffset = 16;
+                int spriteYOffset = 4;
+                int xoffset = 14;
+                int yMove = 10;
+
+                string text = "";
+
+                float unit = Level.current.camera.size.x / 320 * 0.4f;
+
+                off.scale = new Vec2(unit, unit) * 0.5f;
+                on.scale = off.scale;
+                warn.scale = off.scale;
+
+                int[] teams = new int[8];
+                int taggedTeams = 0;
+                int respawnTags = 0;
+                foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+                {
+                    if (tag.responsibleForRespawn)
+                    {
+                        respawnTags++;
+                    }
+                    teams[tag.tagID.value]++;
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (teams[i] > 0)
+                    {
+                        taggedTeams++;
+                    }
+                }
+
+                bool condition1 = false;
+                bool condition2 = false;
+                foreach (Equipper equipper in Level.current.things[typeof(Equipper)])
+                {
+                    if (equipper.GetContainedInstance() is CTEquipment)
+                    {
+                        condition1 = true;
+                    }
+                    if (equipper.GetContainedInstance() is TEquipment)
+                    {
+                        condition2 = true;
+                    }
+                }
+
+                text = "Contest safes placed (" + Level.current.things[typeof(ContestSafe)].Count() + " / " + SafesToWin.value + ")";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (Level.current.things[typeof(ContestSafe)].Count() < SafesToWin)
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "CT Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (condition1)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "T Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (condition2)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Team spawns placed";
+                Graphics.DrawString(text + " (" + Level.current.things[typeof(TeamSpawn)].Count() + " / " + 2 + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (Level.current.things[typeof(TeamSpawn)].Count() > 0)
+                {
+                    if (Level.current.things[typeof(TeamSpawn)].Count() < 2)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Force tags placed";
+                Graphics.DrawString(text + " (" + taggedTeams + " / " + 2 + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (taggedTeams > 0)
+                {
+                    if (taggedTeams < 2 || taggedTeams > 2)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                bool respawners = Level.current.things[typeof(TeamRespawner)].Count() > 0;
+
+                if (respawners)
+                {
+                    if (respawnTags < Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Not enough ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    if (respawnTags > Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Too many ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                if (respawnTags > Level.current.things[typeof(TeamRespawner)].Count())
+                {
+                    row++;
+                    text = "Not enough respawners";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
                 }
             }
         }

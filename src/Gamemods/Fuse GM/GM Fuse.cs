@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace DuckGame.C44P
 {
@@ -31,6 +32,9 @@ namespace DuckGame.C44P
         public StateBinding _ctWinBinding = new StateBinding("ctWins", -1, false, false);
         public StateBinding _tWinBinding = new StateBinding("tWins", -1, false, false);
 
+        Sprite off = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusOFF.png"));
+        Sprite on = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusON.png"));
+        Sprite warn = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusWARN.png"));
 
         public GM_Fuse(float xval, float yval, C4 c4, GMTimer gmt) : base(xval, yval)
         {
@@ -53,6 +57,11 @@ namespace DuckGame.C44P
 
             _editorName = "GM Fuse";
             editorTooltip = "Inactive bomb spawns instead of this block. Check block properties and decide if you want to place 'Plant zones' or 'Defuser' on the map.";
+            maxPlaceable = 1;
+
+            off.CenterOrigin();
+            on.CenterOrigin();
+            warn.CenterOrigin();
         }
         public override void Update()
         {
@@ -119,27 +128,28 @@ namespace DuckGame.C44P
             {
                 TerroristWin();
             }
-            
+
             if (_c4 != null && !(Level.current is Editor))
             {
-                if(_c4.planted)
+                if (_c4.planted)
                 {
                     planted = true;
                     _timer.subtext = "Planted";
                 }
-                if(!planted)
+                if (!planted)
                 {
                     if (_timer != null)
                     {
                         _timer.str = "";
                     }
                 }
-                if(_c4.defused)
+                if (_c4.defused)
                 {
-                    defused = true; Fondle(_timer);
+                    defused = true;
+                    Fondle(_timer);
                     Level.Remove(_timer);
                 }
-                if(defused)
+                if (defused)
                 {
                     _c4.defused = true;
                 }
@@ -152,12 +162,67 @@ namespace DuckGame.C44P
                     }
                     _string = Convert.ToString(time);
                     time -= 0.0166666f;
+
+                    int cteCount = 0;
+                    int teCount = 0;
+                    foreach (CTEquipment cte in Level.current.things[typeof(CTEquipment)])
+                    {
+                        if (cte.equippedDuck != null && !cte.equippedDuck.dead)
+                        {
+                            cteCount++;
+                        }
+                    }
+                    foreach (TEquipment te in Level.current.things[typeof(TEquipment)])
+                    {
+                        if (te.equippedDuck != null && !te.equippedDuck.dead)
+                        {
+                            teCount++;
+                        }
+                    }
+
+                    if (time > 0.01f)
+                    {
+                        if (cteCount == 0)
+                        {
+                            time = 0.01f;
+                        }
+                        if (cteCount + teCount == 0)
+                        {
+                            time = 0.01f;
+                        }
+                        if(!planted && teCount == 0)
+                        {
+                            time = 0.01f;
+                        }
+                    }
+                    GameMode mode = null;
+                    if (Level.current is GameLevel)
+                    {
+                        mode = (GameMode)typeof(GameLevel).GetField("_mode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Level.current);
+                    }
+                    if (mode != null)
+                    {
+                        typeof(GameMode).GetField("_roundEndWait", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(mode, (float)(1 + 0.005f * 60 * time));
+                        //float value = (float)typeof(GameMode).GetField("_roundEndWait", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(mode);
+                        //DevConsole.Log(Convert.ToString(value));
+                    }
                 }
                 if (_c4.planted && !Activate)
                 {
                     time = ExplosionTime;
                     Activate = true;
                     _c4.C4timer = ExplosionTime;
+                    GameMode mode = null;
+                    if (Level.current is GameLevel)
+                    {
+                        mode = (GameMode)typeof(GameLevel).GetField("_mode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Level.current);
+                    }
+                    if (mode != null)
+                    {
+                        typeof(GameMode).GetField("_roundEndWait", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(mode, (float)(1 + 0.005f * 60 * ExplosionTime));
+                        //float value = (float)typeof(GameMode).GetField("_roundEndWait", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(mode);
+                        //DevConsole.Log(Convert.ToString(value));
+                    }
                 }
                 if (_c4.planted && time <= 0f && !ctWins && !tWins)
                 {
@@ -175,6 +240,10 @@ namespace DuckGame.C44P
                 {
                     CounterTerroristWin();
                     ctWins = true;
+                    if(time > 0.01f)
+                    {
+                        time = 0.01f;
+                    }
                     SFX.Play(GetPath("SFX/GameEnd.wav"), 1f, 0f, 0f, false);
                 }
             }
@@ -253,6 +322,106 @@ namespace DuckGame.C44P
             foreach (TeamRespawner respawner in Level.current.things[typeof(TeamRespawner)])
             {
                 Level.Remove(respawner);
+            }
+        }
+
+        public override void Draw()
+        {
+            base.Draw();
+            if (Level.current is Editor)
+            {
+                bool condition1 = false;
+                bool condition2 = false;
+                bool isTherePlantZones = false;
+                bool nonGM_C4 = false;
+                foreach (Equipper equipper in Level.current.things[typeof(Equipper)])
+                {
+                    if(equipper.GetContainedInstance() is CTEquipment)
+                    {
+                        condition1 = true;
+                    }
+                    if (equipper.GetContainedInstance() is TEquipment)
+                    {
+                        condition2 = true;
+                    }
+                }
+
+                if (Level.current.things[typeof(C4)].Count() > 0)
+                {
+                    nonGM_C4 = true;
+                }
+
+                int row = 0;
+                int yoffset = 16;
+                int spriteYOffset = 4;
+                int xoffset = 14;
+                int yMove = 10;
+
+                
+                float unit = Level.current.camera.size.x / 320 * 0.4f;
+
+                off.scale = new Vec2(unit, unit) * 0.5f;
+                on.scale = off.scale;
+                warn.scale = off.scale;
+
+                string text = "CT Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (condition1)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "T Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (condition2)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                if (PlantZones)
+                {
+                    if(Level.current.things[typeof(PlantZone)].Count() > 0)
+                    {
+                        isTherePlantZones = true;
+                    }
+
+                    row++;
+                    text = "Plant zone setted up";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                    if (isTherePlantZones)
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                if(Level.current.things[typeof(Defuser)].Count() == 0)
+                {
+                    row++;
+                    text = "Defuser not placed";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                if (nonGM_C4)
+                {
+                    row++;
+                    text = "Non-GM C4 placed";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
             }
         }
     }

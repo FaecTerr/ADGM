@@ -21,6 +21,7 @@ namespace DuckGame.C44P
 			_fireSound = "smg";
 			_fullAuto = true;
 			_fireWait = 0.4f;
+			_fireSoundPitch = -0.4f;
 			_kickForce = 1f;
 			_fireRumble = RumbleIntensity.Kick;
 			_holdOffset = new Vec2(-1f, 0f);
@@ -49,6 +50,7 @@ namespace DuckGame.C44P
 			_ammoType.accuracy = 0.9f - 0.05f * burst;
 			_ammoType.range = 170f - 10 * burst;
 			_fireWait = 0.4f + 0.1f * burst;
+			_fireSoundPitch = -0.4f + 0.04f * burst;
 		}
         public override void OnReleaseAction()
         {
@@ -58,6 +60,7 @@ namespace DuckGame.C44P
 			_ammoType.range = 170f;
 			burst = 0; 
 			_fireWait = 0.4f;
+			_fireSoundPitch = -0.4f;
 		}
     }
 }

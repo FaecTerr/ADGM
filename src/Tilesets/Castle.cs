@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DuckGame.C44P
 {
-    [EditorGroup("ADGM|Tiles|Castle")]
+    [EditorGroup("ADGM|Tiles|Desert")]
     public class DesertCastleTileset : AutoBlock
     {
         public DesertCastleTileset(float xval, float yval) : base(xval, yval, GetPath<C44P>("Sprites/Tilesets/Castle/sandcastle.png"))

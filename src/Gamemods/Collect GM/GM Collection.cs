@@ -1,4 +1,7 @@
-﻿namespace DuckGame.C44P
+﻿using System;
+using System.Linq;
+
+namespace DuckGame.C44P
 {
     [EditorGroup("ADGM|GameMode Collect")]
     public class GM_Collection : Thing
@@ -20,8 +23,10 @@
         public EditorProperty<float> maxPoints;
         public EditorProperty<float> RoundTime; 
         public EditorProperty<float> AdditionalPoints;
-        public EditorProperty<bool> NewTeamSystem;
-        public EditorProperty<bool> Revive;
+
+        Sprite off = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusOFF.png"));
+        Sprite on = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusON.png"));
+        Sprite warn = new Sprite(Mod.GetPath<C44P>("Sprites/Gamemods/StatusWARN.png"));
 
         public GM_Collection(float xval, float yval, CollectBase cb = null, GMTimer gmt = null) : base(xval, yval)
         {
@@ -36,12 +41,15 @@
             _timer = gmt;
             maxPoints = new EditorProperty<float>(100, this, 10f, 100f, 1f, null, false, false) { name = "Goal points"};
             RoundTime = new EditorProperty<float>(120f, this, 20f, 180f, 1f, null);
-            Revive = new EditorProperty<bool>(true);
-            NewTeamSystem = new EditorProperty<bool>(false);
             AdditionalPoints = new EditorProperty<float>(0, this, 0, 100, 1) { name = "Extra points", _tooltip = "Amount of points team will get after opening box on their base"};
 
             _editorName = "GM Collection";
             editorTooltip = "Req: 'Collection base' for both teams, Collectibles infinite source";
+            maxPlaceable = 1;
+
+            off.CenterOrigin();
+            on.CenterOrigin();
+            warn.CenterOrigin();
         }
         public override void Update()
         {
@@ -78,33 +86,20 @@
                 {
                     if (!winnerDefined)
                     {
-                        if (!NewTeamSystem)
+                        if (teamCollectibles[0] > teamCollectibles[1])
                         {
-                            if (teamCollectibles[0] > teamCollectibles[1])
-                            {
-                                CounterTerroristWin();
-                                winnerDefined = true;
-                            }
-                            else if (teamCollectibles[1] > teamCollectibles[0])
-                            {
-                                TerroristWin();
-                                winnerDefined = true;
-                            }
-                            else
-                            {
-                                CounterTerroristWin();
-                                TerroristWin();
-                            }
+                            CounterTerroristWin();
+                            winnerDefined = true;
+                        }
+                        else if (teamCollectibles[1] > teamCollectibles[0])
+                        {
+                            TerroristWin();
+                            winnerDefined = true;
                         }
                         else
                         {
-                            for (int i = 0; i < teamCollectibles.Length; i++)
-                            {
-                                if (teamCollectibles[i] >= maxPoints && !winnerDefined)
-                                {
-
-                                }
-                            }
+                            CounterTerroristWin();
+                            TerroristWin();
                         }
                     }
                 }
@@ -124,28 +119,17 @@
                         }
                         giveExtra[i] = false;
                     }
-                    if (!NewTeamSystem)
+                    if (teamCollectibles[0] >= maxPoints && !winnerDefined)
                     {
-                        if (teamCollectibles[0] >= maxPoints && !winnerDefined)
-                        {
-                            CounterTerroristWin();
-                            _timer.time = 0f;
-                            winnerDefined = true;
-                        }
-                        if (teamCollectibles[1] >= maxPoints && !winnerDefined)
-                        {
-                            TerroristWin();
-                            _timer.time = 0f;
-                            winnerDefined = true;
-                        }
+                        CounterTerroristWin();
+                        _timer.time = 0f;
+                        winnerDefined = true;
                     }
-                    else
+                    if (teamCollectibles[1] >= maxPoints && !winnerDefined)
                     {
-                        if (teamCollectibles[i] >= maxPoints && !winnerDefined)
-                        {
-                            //TODO
-                            //Flexible team win defining
-                        }
+                        TerroristWin();
+                        _timer.time = 0f;
+                        winnerDefined = true;
                     }
                     if (collecting != null)
                     {
@@ -269,6 +253,209 @@
                 {
                     TeamWin(cte.duck.team);
                     return;
+                }
+            }
+        }
+        public override void Draw()
+        {
+            base.Draw();
+            if (Level.current is Editor)
+            {
+                int row = 0;
+                int yoffset = 16;
+                int spriteYOffset = 4;
+                int xoffset = 14;
+                int yMove = 10;
+
+                string text = "";
+
+                float unit = Level.current.camera.size.x / 320 * 0.4f;
+
+                off.scale = new Vec2(unit, unit) * 0.5f;
+                on.scale = off.scale;
+                warn.scale = off.scale;
+
+                int[] teams = new int[8];
+                int taggedTeams = 0;
+                int respawnTags = 0;
+                foreach (ForceTag tag in Level.current.things[typeof(ForceTag)])
+                {
+                    if (tag.responsibleForRespawn)
+                    {
+                        respawnTags++;
+                    }
+                    teams[tag.tagID.value]++;
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (teams[i] > 0)
+                    {
+                        taggedTeams++;
+                    }
+                }
+
+                bool condition1 = false;
+                bool condition2 = false;
+                foreach (Equipper equipper in Level.current.things[typeof(Equipper)])
+                {
+                    if (equipper.GetContainedInstance() is CTEquipment)
+                    {
+                        condition1 = true;
+                    }
+                    if (equipper.GetContainedInstance() is TEquipment)
+                    {
+                        condition2 = true;
+                    }
+                }
+
+                int[] teamBases = new int[8];
+                int bases = 0;
+
+                foreach(CollectBase cbase in Level.current.things[typeof(CollectBase)])
+                {
+                    teamBases[cbase.team.value]++;
+                }
+                for (int i = 0; i < 8; i++)
+                {
+                    if(teamBases[i] > 0)
+                    {
+                        bases++;
+                    }
+                }
+
+                text = "Collect bases placed (" + bases + " / " + "2" + ")";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (bases > 0)
+                {
+                    if(bases < 2)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "CT Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                if (condition1)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "T Armor equipper";
+                Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (condition2)
+                {
+                    Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Team spawns placed";
+                Graphics.DrawString(text + " (" + Level.current.things[typeof(TeamSpawn)].Count() + " / " + 2 + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (Level.current.things[typeof(TeamSpawn)].Count() > 0)
+                {
+                    if (Level.current.things[typeof(TeamSpawn)].Count() < 2)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                row++;
+                text = "Force tags placed";
+                Graphics.DrawString(text + " (" + taggedTeams + " / " + 2 + ")", Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+
+                if (taggedTeams > 0)
+                {
+                    if (taggedTeams < 2)
+                    {
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    else
+                    {
+                        Graphics.Draw(on, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                else
+                {
+                    Graphics.Draw(off, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                bool respawners = Level.current.things[typeof(TeamRespawner)].Count() > 0;
+
+                if (respawners)
+                {
+                    if (respawnTags < Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Not enough ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                    if (respawnTags > Level.current.things[typeof(TeamSpawn)].Count())
+                    {
+                        row++;
+                        text = "Too many ForceTags with 'Respawn' parameter";
+                        Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                        Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                    }
+                }
+                if (respawnTags > Level.current.things[typeof(TeamRespawner)].Count())
+                {
+                    row++;
+                    text = "Not enough respawners";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
+                }
+
+                bool infiniteSource = false;
+                foreach (ItemSpawner spawner in Level.current.things[typeof(ItemSpawner)])
+                {
+                    if(Editor.GetThing(spawner.contains) is Collectible && spawner.spawnNum < 0)
+                    {
+                        infiniteSource = true;
+                    }
+                }
+                foreach(ItemBox box in Level.current.things[typeof(ItemBox)])
+                {
+                    if(!(box is ItemBoxRandom) && !(box is ItemBoxOneTime) && Editor.GetThing(box.contains) is Collectible)
+                    {
+                        infiniteSource = true;
+                    }
+                }
+
+                if (!infiniteSource)
+                {
+                    row++;
+                    text = "No infinite source of collectibles";
+                    Graphics.DrawString(text, Level.current.camera.position + new Vec2(xoffset, row * yMove + yoffset) * unit, Color.White, depth, null, unit);
+                    Graphics.Draw(warn, Level.current.camera.position.x + (xoffset * 0.5f) * unit, Level.current.camera.position.y + (row * yMove + yoffset + spriteYOffset) * unit);
                 }
             }
         }

@@ -102,6 +102,21 @@ namespace DuckGame.C44P
                         {
                             _sprite.SetAnimation("right");
                         }
+
+                        foreach(ForceTag tag in Level.current.things[typeof(ForceTag)])
+                        {
+                            if(Level.CheckCircle<ContestSafe>(tag.position, tag.range) == this)
+                            {
+                                tag.triggered = true;
+                            }
+                        }
+                        foreach(GM_STOLEN gm in Level.current.things[typeof(GM_STOLEN)])
+                        {
+                            if(gm._timer != null)
+                            {
+                                gm._timer.time += gm.BonusTime.value;
+                            }
+                        }
                     }
                 }
                 else

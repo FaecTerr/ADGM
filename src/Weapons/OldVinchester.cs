@@ -21,6 +21,8 @@
 			collisionSize = new Vec2(16f, 8f);
 			_barrelOffsetTL = new Vec2(24f, 16f);
 			_fireSound = "shotgun";
+			_fireSoundPitch = 0.4f;
+
 			_kickForce = 2f;
 			_fireRumble = RumbleIntensity.Kick;
 			_manualLoad = true;

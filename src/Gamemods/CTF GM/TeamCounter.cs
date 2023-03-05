@@ -18,6 +18,15 @@
             depth = 0.9f;
         }
 
+        public override void Update()
+        {
+            base.Update();
+            if(Timer == null)
+            {
+                Level.Remove(this);
+            }
+        }
+
         public void OnDrawLayer(Layer pLayer)
         {
             if (pLayer == Layer.Foreground)
@@ -33,7 +42,6 @@
 
                     SpriteMap flag = new SpriteMap(GetPath("Sprites/Gamemods/CTF/Flag.png"), 27, 18);
                     flag.CenterOrigin();
-                    flag.scale = Unit * 0.25f;
 
                     int[] sameAmount = new int[8];
 
@@ -53,7 +61,8 @@
                             }
                         }
 
-                        Vec2 flagScale = flag.scale;
+                        flag.color = Color.White;
+                        flag.scale = Unit * 0.25f;
                         flag.depth = 0.91f;
                         Graphics.Draw(flag, drawPosition.x, drawPosition.y);
 
@@ -61,9 +70,6 @@
                         flag.scale *= 1.1f;
                         flag.depth = 0.9f;
                         Graphics.Draw(flag, drawPosition.x, drawPosition.y);
-
-                        flag.color = Color.White;
-                        flag.scale = flagScale;
 
                         //Restoring position for next flag
                         drawPosition = originalPosition;

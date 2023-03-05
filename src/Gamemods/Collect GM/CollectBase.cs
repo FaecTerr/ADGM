@@ -15,7 +15,7 @@
             graphic = _sprite;
             _visibleInGame = false;
             layer = Layer.Foreground;
-            team = new EditorProperty<int>(0, this, 0f, 1f, 1f, null, false, false);
+            team = new EditorProperty<int>(0, this, 0f, 8f, 1f, null, false, false);
         }
         public override void Draw()
         {

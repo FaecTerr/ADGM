@@ -21,6 +21,8 @@
 			_barrelOffsetTL = new Vec2(34f, 4f);
 			_fireSound = "shotgun";
 			_kickForce = 2f;
+			_fireSoundPitch = 0.6f;
+
 			_fireRumble = RumbleIntensity.Light;
 			_holdOffset = new Vec2(10f, -1f);
 			editorTooltip = "Old-timey shotgun, takes approximately 150 years to reload.";
